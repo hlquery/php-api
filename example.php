@@ -701,15 +701,19 @@ if ($command === 'all') {
         ]);
         printResult("POST /collections/{name}/documents/search", $searchPost);
         
-        // GET/POST /collections/{name}/vector_search (Vector search)
+        // POST /collections/{name}/vector_search (Vector search body)
         $vectorQuery = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]; // Sample 10D vector
         $vectorParams = [
-            'vector_query' => $vectorQuery,
-            'limit' => 5,
-            'threshold' => 0.0,
-            'normalize' => true
+            'body' => [
+                'vector' => $vectorQuery,
+                'field_name' => 'embedding',
+                'topk' => 5,
+                'threshold' => 0.0,
+                'normalize' => true,
+                'include_vector' => false
+            ]
         ];
-        printResult("GET /collections/{name}/vector_search (Vector Search)", 
+        printResult("POST /collections/{name}/vector_search (Vector Search)", 
             $client->vectorSearch($searchCollection, $vectorParams));
         
         // POST /multi_search

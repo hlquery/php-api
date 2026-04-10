@@ -1,235 +1,206 @@
 <?php
-/*
- * hlquery PHP Client - Search API
- * 
- * Copyright (C) 2021-2026, Carlos F. Ferry <carlos.ferry@gmail.com>
- * 
- * This file is part of hlquery, released under the BSD License version 3.
- */
 
 namespace Hlquery;
 
 use Hlquery\Utils\Validator;
 
-/*
- * Search API operations
- */
 class Search {
     private $request;
     private $collections;
-    
+
     public function __construct(Request $request, Collections $collections) {
         $this->request = $request;
         $this->collections = $collections;
     }
-    
-    /*
-     * Search documents
-     * 
-     * @param string $collectionName
-     * @param array $params Search parameters
-     * @return Response
-     */
+
     public function search($collectionName, $params = []) {
+        return $this->searchCollection($collectionName, $params, false);
+    }
+
+    public function searchLegacy($collectionName, $params = []) {
+        return $this->searchCollection($collectionName, $params, true);
+    }
+
+    private function searchCollection($collectionName, $params = [], $useLegacyPath = false) {
         Validator::validateCollectionName($collectionName);
         Validator::validateSearchParams($params);
-        
-        $queryParams = [];
-        
-        // Handle structured query object (Elasticsearch-like)
-        if (isset($params['query'])) {
+
+        $query = [];
+
+        if (isset($params['query']) && is_array($params['query'])) {
             if (isset($params['query']['q'])) {
-                $queryParams['q'] = $params['query']['q'];
+                $query['q'] = $params['query']['q'];
             }
             if (isset($params['query']['query_by'])) {
-                $queryParams['query_by'] = is_array($params['query']['query_by']) 
-                    ? implode(',', $params['query']['query_by']) 
+                $query['query_by'] = is_array($params['query']['query_by'])
+                    ? implode(',', $params['query']['query_by'])
                     : $params['query']['query_by'];
             }
         }
-        
-        // Direct query parameters
+
         if (isset($params['q'])) {
-            $queryParams['q'] = $params['q'];
+            $query['q'] = $params['q'];
         }
-        
-        // Fields to search in
+
         if (isset($params['query_by'])) {
-            $queryParams['query_by'] = is_array($params['query_by']) 
-                ? implode(',', $params['query_by']) 
-                : $params['query_by'];
-        } elseif (isset($params['q']) && $params['q'] !== '') {
-            // Auto-detect searchable fields
+            $query['query_by'] = is_array($params['query_by']) ? implode(',', $params['query_by']) : $params['query_by'];
+        } elseif (!empty($params['q'])) {
             $collection = $this->collections->get($collectionName);
             if ($collection->getStatusCode() === 200) {
                 $body = $collection->getBody();
-                if (isset($body['searchable_fields']) && !empty($body['searchable_fields'])) {
-                    $queryParams['query_by'] = implode(',', $body['searchable_fields']);
+                if (!empty($body['searchable_fields']) && is_array($body['searchable_fields'])) {
+                    $query['query_by'] = implode(',', $body['searchable_fields']);
                 }
             }
         }
-        
-        // Pagination
-        if (isset($params['from'])) {
-            $queryParams['offset'] = $params['from'];
-        } elseif (isset($params['offset'])) {
-            $queryParams['offset'] = $params['offset'];
+
+        if (array_key_exists('from', $params)) {
+            $query['offset'] = $params['from'];
+        } elseif (array_key_exists('offset', $params)) {
+            $query['offset'] = $params['offset'];
         }
-        
-        if (isset($params['size'])) {
-            $queryParams['limit'] = $params['size'];
-        } elseif (isset($params['limit'])) {
-            $queryParams['limit'] = $params['limit'];
+
+        if (array_key_exists('size', $params)) {
+            $query['limit'] = $params['size'];
+        } elseif (array_key_exists('limit', $params)) {
+            $query['limit'] = $params['limit'];
         }
-        
-        // Page-based pagination
-        if (isset($params['page'])) {
-            $queryParams['page'] = $params['page'];
+
+        foreach (['page', 'per_page', 'typo_tolerance', 'num_typos'] as $simpleKey) {
+            if (array_key_exists($simpleKey, $params)) {
+                $query[$simpleKey] = $params[$simpleKey];
+            }
         }
-        if (isset($params['per_page'])) {
-            $queryParams['per_page'] = $params['per_page'];
+
+        foreach (['facet_by', 'facets', 'highlight_fields', 'highlight_full_fields'] as $listKey) {
+            if (!array_key_exists($listKey, $params)) {
+                continue;
+            }
+            $targetKey = $listKey === 'facets' ? 'facet_by' : $listKey;
+            $query[$targetKey] = is_array($params[$listKey]) ? implode(',', $params[$listKey]) : $params[$listKey];
         }
-        
-        // Filter
+
+        if (array_key_exists('highlight', $params)) {
+            $query['highlight'] = $params['highlight'] ? 'true' : 'false';
+        }
+
         if (isset($params['filter_by'])) {
-            $queryParams['filter_by'] = $params['filter_by'];
+            $query['filter_by'] = $params['filter_by'];
         } elseif (isset($params['filter'])) {
-            $queryParams['filter_by'] = is_array($params['filter']) 
-                ? json_encode($params['filter']) 
-                : $params['filter'];
+            $query['filter_by'] = is_array($params['filter']) ? json_encode($params['filter']) : $params['filter'];
         }
-        
-        // Sort
+
         if (isset($params['sort'])) {
             if (is_array($params['sort'])) {
-                $sortFields = [];
+                $parts = [];
                 foreach ($params['sort'] as $sortItem) {
                     if (is_array($sortItem)) {
                         foreach ($sortItem as $field => $order) {
-                            $sortFields[] = $order === 'desc' ? '-' . $field : $field;
+                            $parts[] = $order === 'desc' ? '-' . $field : $field;
                         }
                     } else {
-                        $sortFields[] = $sortItem;
+                        $parts[] = $sortItem;
                     }
                 }
-                $queryParams['sort_by'] = implode(',', $sortFields);
+                $query['sort_by'] = implode(',', $parts);
             } else {
-                $queryParams['sort_by'] = $params['sort'];
+                $query['sort_by'] = $params['sort'];
             }
         } elseif (isset($params['sort_by'])) {
-            $queryParams['sort_by'] = is_array($params['sort_by'])
-                ? implode(',', $params['sort_by'])
-                : $params['sort_by'];
+            $query['sort_by'] = is_array($params['sort_by']) ? implode(',', $params['sort_by']) : $params['sort_by'];
         }
-        
-        // Facets
-        if (isset($params['facet_by'])) {
-            $queryParams['facet_by'] = is_array($params['facet_by'])
-                ? implode(',', $params['facet_by'])
-                : $params['facet_by'];
-        } elseif (isset($params['facets'])) {
-            $queryParams['facet_by'] = is_array($params['facets'])
-                ? implode(',', $params['facets'])
-                : $params['facets'];
-        }
-        
-        // Additional search parameters
-        if (isset($params['typo_tolerance'])) {
-            $queryParams['typo_tolerance'] = $params['typo_tolerance'];
-        }
-        
-        if (isset($params['num_typos'])) {
-            $queryParams['num_typos'] = $params['num_typos'];
-        }
-        
-        // Highlighting parameters
-        if (isset($params['highlight'])) {
-            $queryParams['highlight'] = ($params['highlight'] === true || $params['highlight'] === 'true' || $params['highlight'] === 1) ? 'true' : 'false';
-        }
-        
-        if (isset($params['highlight_fields'])) {
-            $queryParams['highlight_fields'] = is_array($params['highlight_fields'])
-                ? implode(',', $params['highlight_fields'])
-                : $params['highlight_fields'];
-        }
-        
-        if (isset($params['highlight_full_fields'])) {
-            $queryParams['highlight_full_fields'] = is_array($params['highlight_full_fields'])
-                ? implode(',', $params['highlight_full_fields'])
-                : $params['highlight_full_fields'];
-        }
-        
-        // Determine HTTP method
-        $method = isset($params['body']) ? 'POST' : 'GET';
-        $body = isset($params['body']) ? $params['body'] : null;
-        
-        return $this->request->execute($method, '/collections/' . urlencode($collectionName) . '/documents/search', $body, $queryParams);
+
+        $method = array_key_exists('body', $params) ? 'POST' : 'GET';
+        $body = $method === 'POST' ? $params['body'] : null;
+        $path = $useLegacyPath
+            ? '/collections/' . rawurlencode($collectionName) . '/documents/search'
+            : '/collections/' . rawurlencode($collectionName) . '/search';
+
+        return $this->request->execute($method, $path, $body, $query);
     }
-    
-    /*
-     * Multi-search across multiple collections
-     * 
-     * @param array $searches Array of search requests
-     * @return Response
-     */
+
     public function multiSearch($searches) {
         return $this->request->execute('POST', '/multi_search', ['searches' => $searches]);
     }
-    
-    /*
-     * Vector search
-     * 
-     * @param string $collectionName
-     * @param array $params Vector search parameters:
-     *   - vector_query: Array of floats or JSON string
-     *   - embedding: Array of floats or JSON string (alias for vector_query)
-     *   - field_name: Field name to search in (default: 'embedding')
-     *   - limit: Number of results (default: 10)
-     *   - threshold: Similarity threshold (default: 0.0)
-     *   - normalize: Normalize vectors (default: true)
-     * @return Response
-     */
+
+    public function globalSearch($params = []) {
+        Validator::validateSearchParams($params);
+        $method = array_key_exists('body', $params) ? 'POST' : 'GET';
+        $body = $method === 'POST' ? $params['body'] : null;
+        $query = $method === 'GET' ? $params : [];
+        return $this->request->execute($method, '/search', $body, $query);
+    }
+
     public function vectorSearch($collectionName, $params = []) {
         Validator::validateCollectionName($collectionName);
-        
-        $queryParams = [];
-        
-        // Handle vector query
-        if (isset($params['vector_query'])) {
-            if (is_array($params['vector_query'])) {
-                $queryParams['vector_query'] = json_encode($params['vector_query']);
-            } else {
-                $queryParams['vector_query'] = $params['vector_query'];
+
+        $query = [];
+        $forcePost = false;
+
+        foreach (['vector_query', 'vectorQuery', 'vector', 'embedding'] as $vectorKey) {
+            if (!array_key_exists($vectorKey, $params)) {
+                continue;
             }
-        } elseif (isset($params['embedding'])) {
-            if (is_array($params['embedding'])) {
-                $queryParams['vector_query'] = json_encode($params['embedding']);
-            } else {
-                $queryParams['vector_query'] = $params['embedding'];
+            $value = $params[$vectorKey];
+            $query['vector_query'] = is_array($value) ? json_encode($value) : $value;
+            break;
+        }
+
+        if (isset($params['field_name']) || isset($params['field']) || isset($params['fieldName'])) {
+            $query['field_name'] = $params['field_name'] ?? $params['field'] ?? $params['fieldName'];
+        }
+
+        foreach (['limit', 'topk', 'top_k', 'topK', 'k', 'per_page'] as $limitKey) {
+            if (array_key_exists($limitKey, $params)) {
+                $query['limit'] = $params[$limitKey];
+                break;
             }
         }
-        
-        if (isset($params['field_name'])) {
-            $queryParams['field_name'] = $params['field_name'];
+
+        foreach (['threshold', 'radius', 'max_distance', 'maxDistance', 'range_filter', 'rangeFilter', 'min_distance', 'minDistance'] as $passthroughKey) {
+            if (array_key_exists($passthroughKey, $params)) {
+                $targetKey = preg_replace('/[A-Z]/', '_$0', $passthroughKey);
+                $query[strtolower($targetKey)] = $params[$passthroughKey];
+            }
         }
-        
-        if (isset($params['limit'])) {
-            $queryParams['limit'] = $params['limit'];
+
+        foreach (['output_fields', 'outputFields'] as $outputKey) {
+            if (array_key_exists($outputKey, $params)) {
+                $query['output_fields'] = is_array($params[$outputKey]) ? implode(',', $params[$outputKey]) : $params[$outputKey];
+                break;
+            }
         }
-        
-        if (isset($params['threshold'])) {
-            $queryParams['threshold'] = $params['threshold'];
+
+        foreach (['include_vector', 'includeVector', 'include_distance', 'includeDistance', 'normalize'] as $boolKey) {
+            if (array_key_exists($boolKey, $params)) {
+                $targetKey = preg_replace('/[A-Z]/', '_$0', $boolKey);
+                $query[strtolower($targetKey)] = $params[$boolKey] ? 'true' : 'false';
+            }
         }
-        
-        if (isset($params['normalize'])) {
-            $queryParams['normalize'] = $params['normalize'] ? 'true' : 'false';
+
+        if (isset($params['filter_by'])) {
+            $query['filter_by'] = $params['filter_by'];
+        } elseif (isset($params['filterBy'])) {
+            $query['filter_by'] = $params['filterBy'];
+        } elseif (isset($params['filter'])) {
+            $query['filter_by'] = is_array($params['filter']) ? json_encode($params['filter']) : $params['filter'];
         }
-        
-        // Try vector_search endpoint first, fallback to search endpoint
-        $path = '/collections/' . urlencode($collectionName) . '/vector_search';
-        $method = isset($params['body']) ? 'POST' : 'GET';
-        $body = isset($params['body']) ? $params['body'] : null;
-        
-        return $this->request->execute($method, $path, $body, $queryParams);
+
+        foreach (['query_params', 'queryParams', 'params', 'vector_queries', 'vectorQueries', 'vectorQuery'] as $postOnlyKey) {
+            if (array_key_exists($postOnlyKey, $params)) {
+                $forcePost = true;
+                break;
+            }
+        }
+
+        $method = array_key_exists('body', $params) || $forcePost ? 'POST' : 'GET';
+        $body = array_key_exists('body', $params) ? $params['body'] : ($forcePost ? $params : null);
+
+        return $this->request->execute(
+            $method,
+            '/collections/' . rawurlencode($collectionName) . '/vector_search',
+            $body,
+            $query
+        );
     }
 }
