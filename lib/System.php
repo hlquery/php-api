@@ -23,6 +23,7 @@ class System {
     public function docTotal() { return $this->request->execute('GET', '/doctotal'); }
     public function etc() { return $this->request->execute('GET', '/etc'); }
     public function ping() { return $this->request->execute('GET', '/ping'); }
+    public function flush() { return $this->request->execute('POST', '/flush'); }
     public function integrity() { return $this->request->execute('GET', '/integrity'); }
     public function consistency() { return $this->request->execute('GET', '/consistency'); }
     public function selfCheck() { return $this->request->execute('GET', '/self-check'); }

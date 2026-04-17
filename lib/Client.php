@@ -79,6 +79,7 @@ class Client {
     public function docTotal() { return $this->systemApi->docTotal(); }
     public function etc() { return $this->systemApi->etc(); }
     public function ping() { return $this->systemApi->ping(); }
+    public function flush() { return $this->systemApi->flush(); }
     public function integrity() { return $this->systemApi->integrity(); }
     public function consistency() { return $this->systemApi->consistency(); }
     public function selfCheck() { return $this->systemApi->selfCheck(); }
