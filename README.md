@@ -94,15 +94,14 @@ print_r($collections->getBody());
 
 ### Reduce Text Example
 
-If the `ai_search` module is enabled, use `executeRequest()` to summarize a stored document:
+Use `executeRequest()` to call custom module routes directly:
 
 ```php
-$summary = $client->executeRequest('GET', '/modules/ai_search/talk', null, [
-    'q' => 'summarize onboarding guide in docs',
-    'run' => 'true',
+$moduleResponse = $client->executeRequest('GET', '/modules/<name>/<route>', null, [
+    'q' => 'example query',
 ]);
 
-print_r($summary->getBody());
+print_r($moduleResponse->getBody());
 ```
 
 ### Common Examples
