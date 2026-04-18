@@ -84,6 +84,8 @@ class Client {
     public function consistency() { return $this->systemApi->consistency(); }
     public function selfCheck() { return $this->systemApi->selfCheck(); }
     public function storageStatus() { return $this->systemApi->storageStatus(); }
+    public function sql($sql, $params = []) { return $this->systemApi->sql($sql, $params); }
+    public function execSql($sql) { return $this->systemApi->execSql($sql); }
 
     public function listCollections($offset = 0, $limit = 10) { return $this->collectionsApi->list($offset, $limit); }
     public function getCollection($name) { return $this->collectionsApi->get($name); }
@@ -91,5 +93,6 @@ class Client {
     public function listDocuments($collectionName, $params = []) { return $this->documentsApi->list($collectionName, $params); }
     public function getDocument($collectionName, $documentId) { return $this->documentsApi->get($collectionName, $documentId); }
     public function search($collectionName, $params = []) { return $this->searchApi->search($collectionName, $params); }
+    public function sqlSearch($collectionName, $sql, $params = []) { return $this->searchApi->sql($collectionName, $sql, $params); }
     public function vectorSearch($collectionName, $params = []) { return $this->searchApi->vectorSearch($collectionName, $params); }
 }

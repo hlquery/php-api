@@ -14,8 +14,6 @@
 </div>
 
 
-# hlquery PHP API Client
-
 Compact PHP client for hlquery. No framework required, no extra runtime dependencies beyond `curl` and `json`.
 
 Included in the current client:
@@ -23,6 +21,7 @@ Included in the current client:
 - Collections
 - Documents
 - Search
+- SQL
 - Keys
 - Aliases
 - Overrides
@@ -163,6 +162,38 @@ $results = $client->search('products', [
 ]);
 ```
 
+### SQL
+
+Basic SQL example:
+
+```php
+$results = $client->sqlSearch('products', 'SELECT id, title FROM products ORDER BY title ASC LIMIT 3;');
+
+if ($results->isSuccess()) {
+    $body = $results->getBody();
+    print_r($body['rows'] ?? []);
+}
+```
+
+Collection-bound SQL `SELECT`:
+
+```php
+$results = $client->sqlSearch(
+    'products',
+    'SELECT id, title, price FROM products WHERE price >= 100 ORDER BY price DESC LIMIT 5;'
+);
+```
+
+Top-level SQL execution:
+
+```php
+$rows = $client->sql('SHOW COLLECTIONS;');
+
+$insert = $client->execSql(
+    "INSERT INTO products (id, title, price) VALUES ('sku-9', 'Camp Stove', 89);"
+);
+```
+
 ### Vector Search Notes
 
 For vector search, the important part is usually not the raw embedding array in the example, but the search knobs around it.
@@ -212,3 +243,11 @@ $client->synonyms()->createGlobal('global_shoe_terms', [
     'synonyms' => ['sneaker', 'trainer'],
 ]);
 ```
+
+### Examples
+
+- `basic_usage.php`
+- `collections.php`
+- `documents.php`
+- `search.php`
+- `sql.php`

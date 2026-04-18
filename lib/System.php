@@ -22,6 +22,24 @@ class System {
     public function rocksdbInternal() { return $this->request->execute('GET', '/_rocksdb'); }
     public function docTotal() { return $this->request->execute('GET', '/doctotal'); }
     public function etc() { return $this->request->execute('GET', '/etc'); }
+    public function sql($sql, $params = []) {
+        if (!is_string($sql) || trim($sql) === '') {
+            throw new ValidationException('SQL query must be a non-empty string');
+        }
+
+        if (!is_array($params)) {
+            throw new ValidationException('SQL params must be an array');
+        }
+
+        return $this->request->execute('GET', '/sql', null, array_merge($params, ['sql' => $sql]));
+    }
+    public function execSql($sql) {
+        if (!is_string($sql) || trim($sql) === '') {
+            throw new ValidationException('SQL query must be a non-empty string');
+        }
+
+        return $this->request->execute('POST', '/sql', ['exec' => $sql]);
+    }
     public function ping() { return $this->request->execute('GET', '/ping'); }
     public function flush() { return $this->request->execute('POST', '/flush'); }
     public function integrity() { return $this->request->execute('GET', '/integrity'); }

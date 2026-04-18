@@ -22,6 +22,28 @@ class Search {
         return $this->searchCollection($collectionName, $params, false);
     }
 
+    public function sql($collectionName, $sql, $params = []) {
+        Validator::validateCollectionName($collectionName);
+
+        if (!is_string($sql) || trim($sql) === '') {
+            throw new ValidationException('SQL query must be a non-empty string');
+        }
+
+        if (!is_array($params)) {
+            throw new ValidationException('SQL params must be an array');
+        }
+
+        $query = $params;
+        $query['sql'] = $sql;
+
+        return $this->request->execute(
+            'GET',
+            '/collections/' . rawurlencode($collectionName) . '/documents/search',
+            null,
+            $query
+        );
+    }
+
     public function searchLegacy($collectionName, $params = []) {
         return $this->searchCollection($collectionName, $params, true);
     }
