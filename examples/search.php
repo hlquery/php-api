@@ -89,6 +89,14 @@ $combinedResults = $client->search($collection, [
 echo "Filtered results: " . json_encode($combinedResults->getBody(), JSON_PRETTY_PRINT) . "\n";
 
 // Vector search
+// Important knobs:
+// - field_name: the vector field stored in the collection
+// - topk: how many nearest matches to return
+// - threshold: minimum similarity / distance gate, depending on server config
+// - nprobe: higher usually improves recall, but increases latency
+//
+// In practice, nprobe is one of the first params to tune when vector results
+// feel too weak or too narrow.
 $vectorResults = $client->vectorSearch($collection, [
     'body' => [
         'vector' => [0.1, 0.2, 0.3, 0.4, 0.5],

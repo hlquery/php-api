@@ -17,6 +17,16 @@ namespace Hlquery\Utils;
  * Input validation utility class
  */
 class Validator {
+    private static function requireNonEmptyString($value, $fieldName) {
+        if (!is_string($value)) {
+            throw new \Hlquery\ValidationException($fieldName . " must be a non-empty string");
+        }
+
+        if (trim($value) === '') {
+            throw new \Hlquery\ValidationException($fieldName . " must be a non-empty string");
+        }
+    }
+
     /*
      * Validate collection name
      * 
@@ -24,9 +34,7 @@ class Validator {
      * @throws ValidationException
      */
     public static function validateCollectionName($name) {
-        if (empty($name) || !is_string($name)) {
-            throw new \Hlquery\ValidationException("Collection name must be a non-empty string");
-        }
+        self::requireNonEmptyString($name, 'Collection name');
         
         // Check name length (matches server validation: 1-64 characters)
         if (strlen($name) > 64) {
@@ -52,18 +60,39 @@ class Validator {
      * @throws ValidationException
      */
     public static function validateDocumentId($id) {
-        if (empty($id) || !is_string($id)) {
-            throw new \Hlquery\ValidationException("Document ID must be a non-empty string");
+        self::requireNonEmptyString($id, 'Document ID');
+        
+        // Matches server validation: 1-256 characters.
+        if (strlen($id) > 256) {
+            throw new \Hlquery\ValidationException("Document ID must be between 1 and 256 characters");
         }
         
-        // Check name length (matches server validation: 1-64 characters)
-        if (strlen($id) > 64) {
-            throw new \Hlquery\ValidationException("Document ID must be between 1 and 64 characters");
+        // Matches server validation: alphanumeric, underscores, hyphens, and dots.
+        if (preg_match('/[^a-zA-Z0-9_.-]/', $id)) {
+            throw new \Hlquery\ValidationException("Document ID contains invalid characters. Use only letters, numbers, underscores, hyphens, and dots");
         }
-        
-        // Document IDs should be URL-safe: alphanumeric, underscores, and hyphens only
-        if (preg_match('/[^a-zA-Z0-9_-]/', $id)) {
-            throw new \Hlquery\ValidationException("Document ID contains invalid characters. Use only letters, numbers, underscores, and hyphens");
+    }
+
+    /*
+     * Validate alias name
+     *
+     * @param string $name
+     * @throws ValidationException
+     */
+    public static function validateAliasName($name) {
+        self::requireNonEmptyString($name, 'Alias name');
+
+        if (strlen($name) > 64) {
+            throw new \Hlquery\ValidationException("Alias name must be between 1 and 64 characters");
+        }
+
+        if (preg_match('/[^a-zA-Z0-9_.-]/', $name)) {
+            throw new \Hlquery\ValidationException("Alias name contains invalid characters. Use only letters, numbers, underscores, hyphens, and dots");
+        }
+
+        $firstChar = $name[0];
+        if (!ctype_alpha($firstChar) && $firstChar !== '_') {
+            throw new \Hlquery\ValidationException("Alias name must start with a letter or underscore");
         }
     }
     
@@ -95,6 +124,10 @@ class Validator {
      * @throws ValidationException
      */
     public static function validateSearchParams($params) {
+        if (!is_array($params)) {
+            throw new \Hlquery\ValidationException("Search params must be an array");
+        }
+
         if (isset($params['limit']) && (!is_int($params['limit']) || $params['limit'] < 1)) {
             throw new \Hlquery\ValidationException("Limit must be a positive integer");
         }

@@ -163,22 +163,16 @@ $results = $client->search('products', [
 ]);
 ```
 
-### Multi-search
+### Vector Search Notes
 
-```php
-$results = $client->searchApi()->multiSearch([
-    [
-        'collection' => 'products',
-        'q' => 'running',
-        'query_by' => 'title,description',
-    ],
-    [
-        'collection' => 'products',
-        'q' => 'backpack',
-        'query_by' => 'title,description',
-    ],
-]);
-```
+For vector search, the important part is usually not the raw embedding array in the example, but the search knobs around it.
+
+- `field_name` must match the vector field stored in your collection.
+- `topk` controls how many nearest matches you ask for back.
+- `threshold` can cut off weak matches early.
+- `nprobe` is the main recall/speed tradeoff on IVF-style indexes.
+
+Briefly: a higher `nprobe` checks more partitions, which usually improves recall but costs more CPU and latency. Start small, then raise it only if you are missing obvious neighbors. If you are tuning quality, `nprobe` is one of the first parameters worth testing.
 
 ### Read a document
 

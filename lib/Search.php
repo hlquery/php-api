@@ -8,6 +8,11 @@ class Search {
     private $request;
     private $collections;
 
+    private function normalizeSortOrder($order) {
+        $normalized = is_string($order) ? strtolower(trim($order)) : 'asc';
+        return $normalized === 'desc' ? 'desc' : 'asc';
+    }
+
     public function __construct(Request $request, Collections $collections) {
         $this->request = $request;
         $this->collections = $collections;
@@ -96,7 +101,7 @@ class Search {
                 foreach ($params['sort'] as $sortItem) {
                     if (is_array($sortItem)) {
                         foreach ($sortItem as $field => $order) {
-                            $parts[] = $order === 'desc' ? '-' . $field : $field;
+                            $parts[] = $field . ':' . $this->normalizeSortOrder($order);
                         }
                     } else {
                         $parts[] = $sortItem;
