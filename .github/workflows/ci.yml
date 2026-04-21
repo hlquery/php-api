@@ -1,0 +1,32 @@
+name: PHP API CI
+
+on:
+  push:
+    branches: [ main, master, unstable ]
+  pull_request:
+    branches: [ main, master, unstable ]
+  workflow_dispatch:
+
+jobs:
+  lint-and-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Lint PHP sources
+        run: |
+          find . -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Run offline smoke tests
+        run: php test/offline-smoke.php
