@@ -44,23 +44,25 @@ $client->documents()->import($collection, [
     ['id' => 'doc_3', 'title' => 'Cooking basics', 'category' => 'food', 'score' => 30.0, 'active' => false],
 ]);
 
-$select = $client->sqlSearch(
+$sql = $client->sql();
+
+$select = $sql->query(
     $collection,
     "SELECT id, title, score FROM {$collection} WHERE title LIKE '%basics%' ORDER BY score DESC;"
 );
 printResponse('Collection SQL SELECT', $select);
 
-$aggregate = $client->sql(
+$aggregate = $sql->raw(
     "SELECT category, COUNT(*) AS total_docs, AVG(score) AS avg_score FROM {$collection} GROUP BY category ORDER BY total_docs DESC, category ASC;"
 );
 printResponse('Top-level SQL aggregate', $aggregate);
 
-$insert = $client->execSql(
+$insert = $sql->execute(
     "INSERT INTO {$collection} (id, title, category, score, active) VALUES ('doc_4', 'Inserted via SQL', 'ops', 40.0, true);"
 );
 printResponse('Top-level SQL INSERT', $insert);
 
-$showCollections = $client->sql('SHOW COLLECTIONS;');
+$showCollections = $sql->raw('SHOW COLLECTIONS;');
 printResponse('SHOW COLLECTIONS', $showCollections);
 
 $cleanup = $client->collections()->delete($collection);

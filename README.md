@@ -108,44 +108,57 @@ print_r($moduleResponse->getBody());
 
 ### Create a collection
 
+This client uses a service-based API similar to Typesense. The main difference is that hlquery expects the collection name as the first argument, instead of inside the schema array.
+
 ```php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Hlquery\Client;
+
+$client = new Client('http://localhost:9200');
+
+$collections = $client->collections();
+
 $schema = [
-    'searchable_fields' => ['title', 'description'],
-    'filterable_fields' => ['category', 'in_stock'],
-    'sortable_fields' => ['price', 'rating'],
+    'fields' => [
+        ['name' => 'id', 'type' => 'string'],
+        ['name' => 'title', 'type' => 'string'],
+        ['name' => 'author', 'type' => 'string'],
+        ['name' => 'year', 'type' => 'int32'],
+    ],
 ];
 
-$res = $client->collections()->create('products', $schema);
-print_r($res->getBody());
+$response = $collections->create('books', $schema);
+
+print_r($response->getBody());
 ```
 
 ### Add documents
 
 ```php
-$client->documents()->add('products', [
-    'id' => 'sku-1',
-    'title' => 'Trail Running Shoes',
-    'description' => 'Lightweight shoes for mixed terrain',
-    'category' => 'footwear',
-    'price' => 129,
-    'rating' => 4.7,
-    'in_stock' => true,
+$documents = $client->documents();
+
+$documents->add('books', [
+    'id' => '1',
+    'title' => 'The Hobbit',
+    'author' => 'J.R.R. Tolkien',
+    'year' => 1937,
 ]);
 
-$client->documents()->import('products', [
+$documents->import('books', [
     [
-        'id' => 'sku-2',
-        'title' => 'Waterproof Jacket',
-        'description' => 'Breathable shell for wet weather',
-        'category' => 'outerwear',
-        'price' => 189,
+        'id' => '2',
+        'title' => 'Dune',
+        'author' => 'Frank Herbert',
+        'year' => 1965,
     ],
     [
-        'id' => 'sku-3',
-        'title' => 'Daypack 20L',
-        'description' => 'Compact pack for short hikes',
-        'category' => 'bags',
-        'price' => 79,
+        'id' => '3',
+        'title' => 'Neuromancer',
+        'author' => 'William Gibson',
+        'year' => 1984,
     ],
 ]);
 ```
@@ -155,18 +168,26 @@ $client->documents()->import('products', [
 If `q` is set and `query_by` is omitted, the client tries to use the collection's `searchable_fields`.
 
 ```php
-$results = $client->search('products', [
-    'q' => 'waterproof jacket',
+$results = $client->search('books', [
+    'q' => 'tolkien',
     'limit' => 10,
 ]);
 ```
 
 ### SQL
 
+Use the SQL service object for a nested API style:
+
+```php
+$sql = $client->sql();
+```
+
 Basic SQL example:
 
 ```php
-$results = $client->sqlSearch('products', 'SELECT id, title FROM products ORDER BY title ASC LIMIT 3;');
+$sql = $client->sql();
+
+$results = $sql->query('products', 'SELECT id, title FROM products ORDER BY title ASC LIMIT 3;');
 
 if ($results->isSuccess()) {
     $body = $results->getBody();
@@ -177,7 +198,9 @@ if ($results->isSuccess()) {
 Collection-bound SQL `SELECT`:
 
 ```php
-$results = $client->sqlSearch(
+$sql = $client->sql();
+
+$results = $sql->query(
     'products',
     'SELECT id, title, price FROM products WHERE price >= 100 ORDER BY price DESC LIMIT 5;'
 );
@@ -186,9 +209,11 @@ $results = $client->sqlSearch(
 Top-level SQL execution:
 
 ```php
-$rows = $client->sql('SHOW COLLECTIONS;');
+$sql = $client->sql();
 
-$insert = $client->execSql(
+$rows = $sql->raw('SHOW COLLECTIONS;');
+
+$insert = $sql->execute(
     "INSERT INTO products (id, title, price) VALUES ('sku-9', 'Camp Stove', 89);"
 );
 ```
@@ -207,16 +232,15 @@ Briefly: a higher `nprobe` checks more partitions, which usually improves recall
 ### Read a document
 
 ```php
-$doc = $client->getDocument('products', 'sku-1');
+$doc = $client->getDocument('books', '1');
 print_r($doc->getBody());
 ```
 
 ### Update or delete a document
 
 ```php
-$client->documents()->update('products', 'sku-1', [
-    'price' => 119,
-    'in_stock' => false,
+$client->documents()->update('books', '1', [
+    'year' => 1938,
 ]);
 
 $client->documents()->delete('products', 'sku-3');
