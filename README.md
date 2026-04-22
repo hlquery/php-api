@@ -44,7 +44,7 @@ require_once __DIR__ . '/lib/autoload.php';
 
 use Hlquery\Client;
 
-$client = new Client('http://localhost:9200');
+$client = new Client(getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200'));
 ```
 
 Composer:

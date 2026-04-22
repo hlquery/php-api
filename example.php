@@ -24,7 +24,7 @@ require_once __DIR__ . '/lib/autoload.php';
 use Hlquery\Client;
 
 // Configuration
-$baseUrl = 'http://localhost:9200';
+$baseUrl = getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200');
 
 // Parse command line arguments
 $command = 'all';
