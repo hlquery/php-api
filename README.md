@@ -92,6 +92,39 @@ $collections = $client->listCollections(0, 10);
 print_r($collections->getBody());
 ```
 
+### Example API Responses
+
+Captured from a local `http://localhost:9200` server.
+
+`$client->health()->getBody()`:
+
+```json
+{
+  "server": "hlquery",
+  "status": "ok",
+  "version": "1.0"
+}
+```
+
+`$client->search('readme_demo', ['q' => 'search', 'query_by' => 'title,content', 'limit' => 10])->getBody()`:
+
+```json
+{
+  "hits": [
+    {
+      "document": {
+        "id": "doc-2",
+        "title": "Search Engineering Notes"
+      },
+      "highlights": {
+        "title": "<em>Search</em> Engineering Notes"
+      }
+    }
+  ],
+  "found": 1
+}
+```
+
 ### Reduce Text Example
 
 Use `executeRequest()` to call custom module routes directly:
