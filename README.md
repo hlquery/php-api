@@ -300,10 +300,3 @@ $client->synonyms()->createGlobal('global_shoe_terms', [
 ]);
 ```
 
-### Examples
-
-- `basic_usage.php`
-- `collections.php`
-- `documents.php`
-- `search.php`
-- `sql.php`
