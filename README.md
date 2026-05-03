@@ -8,26 +8,13 @@
 
 [![Follow hlquery](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white)](https://x.com/hlquery)
 [![Commit Activity](https://img.shields.io/github/commit-activity/m/hlquery/hlquery)](https://github.com/hlquery/php-api/pulse)
-[![hlquery](https://img.shields.io/badge/GitHub-hlquery-181717?logo=github&logoColor=white)](https://github.com/hlquery/hlquery/stargazers)
+[![php-api](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white)](https://github.com/hlquery/php-api/stargazers)
+[![GitHub](https://img.shields.io/badge/GitHub-hlquery-blue?logo=github&logoColor=white)](https://github.com/hlquery/hlquery/stargazers)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 </div>
 
-
 Compact PHP client for hlquery. No framework required, no extra runtime dependencies beyond `curl` and `json`.
-
-Included in the current client:
-
-- Collections
-- Documents
-- Search
-- SQL
-- Keys
-- Aliases
-- Overrides
-- Synonyms
-- Stopwords
-- System helpers, including `etc()`
 
 ### Install
 
