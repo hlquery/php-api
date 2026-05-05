@@ -79,6 +79,24 @@ $collections = $client->listCollections(0, 10);
 print_r($collections->getBody());
 ```
 
+### SAM
+
+Use the SAM service for SAM search, background status, and recent query history:
+
+```php
+$sam = $client->sam();
+
+$status = $sam->status('music');
+$history = $sam->history('music', 5);
+$results = $sam->search('music', 'queen of pop', [
+    'limit' => 10,
+]);
+
+print_r($status->getBody());
+print_r($history->getBody());
+print_r($results->getBody());
+```
+
 ### Example API Responses
 
 Captured from a local `http://localhost:9200` server.
@@ -286,4 +304,3 @@ $client->synonyms()->createGlobal('global_shoe_terms', [
     'synonyms' => ['sneaker', 'trainer'],
 ]);
 ```
-
