@@ -14,6 +14,18 @@
 
 </div>
 
+### What is the hlquery PHP API?
+
+The hlquery PHP API is the official PHP client for hlquery. It wraps the server's HTTP/JSON endpoints in a small, framework-agnostic interface so PHP applications can create collections, index documents, run searches, query SAM, and call admin or module routes without hand-writing raw cURL requests.
+
+It is designed to stay close to hlquery's API surface while giving PHP projects a cleaner service-based client for common operations.
+
+### Why use it?
+
+Use the PHP API when you want to integrate hlquery into a PHP application with less boilerplate and more predictable request handling. It gives you one client entry point, built-in auth helpers, structured response objects, and direct access to core hlquery features without adding a heavy dependency stack.
+
+It is a practical fit for plain PHP projects, Laravel or Symfony backends, internal tools, content systems, and any service that needs fast search integration while keeping the code simple.
+
 Compact PHP client for hlquery. No framework required, no extra runtime dependencies beyond `curl` and `json`.
 
 ### Install
