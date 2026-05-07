@@ -16,15 +16,24 @@
 
 ### What is the hlquery PHP API?
 
-The hlquery PHP API is the official PHP client for hlquery. It wraps the server's HTTP/JSON endpoints in a small, framework-agnostic interface so PHP applications can create collections, index documents, run searches, query SAM, and call admin or module routes without hand-writing raw cURL requests.
+The hlquery PHP API is the official PHP client for hlquery. It gives PHP applications a straightforward way to talk to the search engine through a small, framework-agnostic client instead of manually building HTTP requests around `curl`.
 
-It is designed to stay close to hlquery's API surface while giving PHP projects a cleaner service-based client for common operations.
+The library wraps hlquery's HTTP/JSON endpoints in a service-based API so you can create collections, index documents, run searches, manage synonyms and stopwords, query SAM, and call admin or custom module routes from regular PHP code.
+
+It stays close to hlquery's server capabilities, but presents them in a cleaner shape for application code: one client entry point, response objects, auth helpers, and predictable request methods.
 
 ### Why use it?
 
-Use the PHP API when you want to integrate hlquery into a PHP application with less boilerplate and more predictable request handling. It gives you one client entry point, built-in auth helpers, structured response objects, and direct access to core hlquery features without adding a heavy dependency stack.
+Use the PHP API when you want hlquery integration to feel like part of your application instead of a pile of hand-written REST calls. It reduces boilerplate, keeps authentication and request formatting consistent, and makes common operations easier to read and maintain.
 
-It is a practical fit for plain PHP projects, Laravel or Symfony backends, internal tools, content systems, and any service that needs fast search integration while keeping the code simple.
+It is a good fit for plain PHP projects, Laravel or Symfony backends, internal dashboards, CMS-style applications, and API services that need fast search features without adding a large framework-specific dependency.
+
+### Why choose it over raw HTTP?
+
+- Less boilerplate for common search, indexing, and admin operations.
+- One consistent client for auth, params, headers, and response parsing.
+- Direct access to hlquery features such as collections, documents, SQL, overrides, synonyms, stopwords, and SAM.
+- Works in simple PHP environments with no framework requirement.
 
 Compact PHP client for hlquery. No framework required, no extra runtime dependencies beyond `curl` and `json`.
 
