@@ -8,34 +8,28 @@
 
 [![Follow hlquery](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white)](https://x.com/hlquery)
 [![Commit Activity](https://img.shields.io/github/commit-activity/m/hlquery/hlquery)](https://github.com/hlquery/php-api/pulse)
-[![php-api](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white)](https://github.com/hlquery/php-api/stargazers)
-[![GitHub](https://img.shields.io/badge/GitHub-hlquery-blue?logo=github&logoColor=white)](https://github.com/hlquery/hlquery/stargazers)
+[![GitHub](https://img.shields.io/badge/GitHub-php--api-181717?logo=github&logoColor=white)](https://github.com/hlquery/php-api/stargazers)
+[![hlquery](https://img.shields.io/badge/GitHub-hlquery-blue?logo=github&logoColor=white)](https://github.com/hlquery/hlquery/stargazers)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 </div>
 
 ### What is the hlquery PHP API?
 
-The hlquery PHP API is the official PHP client for hlquery. It gives PHP applications a straightforward way to talk to the search engine through a small, framework-agnostic client instead of manually building HTTP requests around `curl`.
+The hlquery PHP API is the official PHP client for hlquery. It gives PHP applications a straightforward way to talk to the search engine through a small client instead of manually assembling `curl` calls and JSON payloads.
 
-The library wraps hlquery's HTTP/JSON endpoints in a service-based API so you can create collections, index documents, run searches, manage synonyms and stopwords, query SAM, and call admin or custom module routes from regular PHP code.
-
-It stays close to hlquery's server capabilities, but presents them in a cleaner shape for application code: one client entry point, response objects, auth helpers, and predictable request methods.
+The library wraps hlquery's HTTP endpoints in a service-based API so you can create collections, index documents, run searches, manage lexical resources, query SAM, and call custom module routes from normal PHP code.
 
 ### Why use it?
 
 Use the PHP API when you want hlquery integration to feel like part of your application instead of a pile of hand-written REST calls. It reduces boilerplate, keeps authentication and request formatting consistent, and makes common operations easier to read and maintain.
 
-It is a good fit for plain PHP projects, Laravel or Symfony backends, internal dashboards, CMS-style applications, and API services that need fast search features without adding a large framework-specific dependency.
-
 ### Why choose it over raw HTTP?
 
-- Less boilerplate for common search, indexing, and admin operations.
+- Less boilerplate for search, indexing, and admin operations.
 - One consistent client for auth, params, headers, and response parsing.
-- Direct access to hlquery features such as collections, documents, SQL, overrides, synonyms, stopwords, and SAM.
-- Works in simple PHP environments with no framework requirement.
-
-Compact PHP client for hlquery. No framework required, no extra runtime dependencies beyond `curl` and `json`.
+- Direct access to collections, documents, SQL, overrides, synonyms, stopwords, and SAM.
+- Works in plain PHP with no framework requirement.
 
 ### Install
 
@@ -44,6 +38,12 @@ Requirements:
 - PHP `>= 7.0`
 - `ext-curl`
 - `ext-json`
+
+Composer:
+
+```bash
+composer require hlquery/php-client
+```
 
 Local usage:
 
@@ -55,11 +55,7 @@ use Hlquery\Client;
 $client = new Client(getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200'));
 ```
 
-Composer:
-
-```bash
-composer require hlquery/php-client
-```
+Composer usage:
 
 ```php
 require_once __DIR__ . '/vendor/autoload.php';
@@ -69,22 +65,22 @@ use Hlquery\Client;
 $client = new Client('http://localhost:9200');
 ```
 
-Auth:
+### Auth
 
 ```php
 $client = new Client('http://localhost:9200', [
     'token' => 'your_token_here',
-    'auth_method' => 'bearer', // or 'api-key'
+    'auth_method' => 'bearer',
 ]);
 
-// or later
 $client->setAuthToken('your_token_here', 'bearer');
+$client->setAuthToken('your_api_key_here', 'api-key');
 ```
 
 ### Quick Start
 
 ```php
-require_once __DIR__ . '/lib/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Hlquery\Client;
 
@@ -92,8 +88,7 @@ $client = new Client('http://localhost:9200');
 
 $health = $client->health();
 if ($health->isSuccess()) {
-    $body = $health->getBody();
-    echo "status: " . ($body['status'] ?? 'ok') . PHP_EOL;
+    echo "status: " . (($health->getBody()['status'] ?? 'ok')) . PHP_EOL;
 }
 
 $collections = $client->listCollections(0, 10);
@@ -102,7 +97,9 @@ print_r($collections->getBody());
 
 ### SAM
 
-Use the SAM service for SAM search, background status, and recent query history:
+Use the SAM service for search, background status, and recent query history:
+
+SAM is separate from vector search. It performs term and intent-style lookup, not vector similarity search.
 
 ```php
 $sam = $client->sam();
@@ -118,37 +115,19 @@ print_r($history->getBody());
 print_r($results->getBody());
 ```
 
-### Example API Responses
+### SQL
 
-Captured from a local `http://localhost:9200` server.
+```php
+$sql = $client->sql();
 
-`$client->health()->getBody()`:
+$rows = $sql->query('SHOW COLLECTIONS;');
+$books = $sql->search(
+    'books',
+    'SELECT id, title FROM books ORDER BY title ASC LIMIT 3;'
+);
 
-```json
-{
-  "server": "hlquery",
-  "status": "ok",
-  "version": "1.0"
-}
-```
-
-`$client->search('readme_demo', ['q' => 'search', 'query_by' => 'title,content', 'limit' => 10])->getBody()`:
-
-```json
-{
-  "hits": [
-    {
-      "document": {
-        "id": "doc-2",
-        "title": "Search Engineering Notes"
-      },
-      "highlights": {
-        "title": "<em>Search</em> Engineering Notes"
-      }
-    }
-  ],
-  "found": 1
-}
+print_r($rows->getBody());
+print_r($books->getBody());
 ```
 
 ### Reduce Text Example
@@ -163,165 +142,8 @@ $moduleResponse = $client->executeRequest('GET', '/modules/<name>/<route>', null
 print_r($moduleResponse->getBody());
 ```
 
-### Common Examples
+### Notes
 
-### Create a collection
-
-This client uses a service-based API similar to Typesense. The main difference is that hlquery expects the collection name as the first argument, instead of inside the schema array.
-
-```php
-<?php
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Hlquery\Client;
-
-$client = new Client('http://localhost:9200');
-
-$collections = $client->collections();
-
-$schema = [
-    'fields' => [
-        ['name' => 'id', 'type' => 'string'],
-        ['name' => 'title', 'type' => 'string'],
-        ['name' => 'author', 'type' => 'string'],
-        ['name' => 'year', 'type' => 'int32'],
-    ],
-];
-
-$response = $collections->create('books', $schema);
-
-print_r($response->getBody());
-```
-
-### Add documents
-
-```php
-$documents = $client->documents();
-
-$documents->add('books', [
-    'id' => '1',
-    'title' => 'The Hobbit',
-    'author' => 'J.R.R. Tolkien',
-    'year' => 1937,
-]);
-
-$documents->import('books', [
-    [
-        'id' => '2',
-        'title' => 'Dune',
-        'author' => 'Frank Herbert',
-        'year' => 1965,
-    ],
-    [
-        'id' => '3',
-        'title' => 'Neuromancer',
-        'author' => 'William Gibson',
-        'year' => 1984,
-    ],
-]);
-```
-
-### Search without `query_by`
-
-If `q` is set and `query_by` is omitted, the client tries to use the collection's `searchable_fields`.
-
-```php
-$results = $client->search('books', [
-    'q' => 'tolkien',
-    'limit' => 10,
-]);
-```
-
-### SQL
-
-Use the SQL service object for a nested API style:
-
-```php
-$sql = $client->sql();
-```
-
-Basic SQL example:
-
-```php
-$sql = $client->sql();
-
-$results = $sql->query('products', 'SELECT id, title FROM products ORDER BY title ASC LIMIT 3;');
-
-if ($results->isSuccess()) {
-    $body = $results->getBody();
-    print_r($body['rows'] ?? []);
-}
-```
-
-Collection-bound SQL `SELECT`:
-
-```php
-$sql = $client->sql();
-
-$results = $sql->query(
-    'products',
-    'SELECT id, title, price FROM products WHERE price >= 100 ORDER BY price DESC LIMIT 5;'
-);
-```
-
-Top-level SQL execution:
-
-```php
-$sql = $client->sql();
-
-$rows = $sql->raw('SHOW COLLECTIONS;');
-
-$insert = $sql->execute(
-    "INSERT INTO products (id, title, price) VALUES ('sku-9', 'Camp Stove', 89);"
-);
-```
-
-### Vector Search Notes
-
-For vector search, the important part is usually not the raw embedding array in the example, but the search knobs around it.
-
-- `field_name` must match the vector field stored in your collection.
-- `topk` controls how many nearest matches you ask for back.
-- `threshold` can cut off weak matches early.
-- `nprobe` is the main recall/speed tradeoff on IVF-style indexes.
-
-Briefly: a higher `nprobe` checks more partitions, which usually improves recall but costs more CPU and latency. Start small, then raise it only if you are missing obvious neighbors. If you are tuning quality, `nprobe` is one of the first parameters worth testing.
-
-### Read a document
-
-```php
-$doc = $client->getDocument('books', '1');
-print_r($doc->getBody());
-```
-
-### Update or delete a document
-
-```php
-$client->documents()->update('books', '1', [
-    'year' => 1938,
-]);
-
-$client->documents()->delete('products', 'sku-3');
-```
-
-### Synonyms
-
-```php
-$client->synonyms()->create('products', 'shoe_terms', [
-    'root' => 'shoe',
-    'synonyms' => ['sneaker', 'trainer'],
-]);
-
-$synonyms = $client->synonyms()->list('products');
-print_r($synonyms->getBody());
-```
-
-Global synonyms are also supported:
-
-```php
-$client->synonyms()->createGlobal('global_shoe_terms', [
-    'root' => 'shoe',
-    'synonyms' => ['sneaker', 'trainer'],
-]);
-```
+- Base URL defaults to `http://localhost:9200`.
+- The client stays framework-agnostic.
+- See `etc/api/php/example.php` and the language-specific examples in this repo for more complete flows.
