@@ -26,10 +26,7 @@ Use the PHP API when you want hlquery integration to feel like part of your appl
 
 ### Why choose it over raw HTTP?
 
-- Less boilerplate for search, indexing, and admin operations.
-- One consistent client for auth, params, headers, and response parsing.
-- Direct access to collections, documents, SQL, overrides, synonyms, stopwords, and SAM.
-- Works in plain PHP with no framework requirement.
+Choose the PHP client over raw HTTP when you want less boilerplate around search, indexing, and admin operations, one consistent client for auth, params, headers, and response parsing, and direct access to collections, documents, SQL, overrides, synonyms, stopwords, and SAM. It also works in plain PHP with no framework requirement.
 
 ### Install
 
