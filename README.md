@@ -48,7 +48,6 @@ Local usage:
 require_once __DIR__ . '/lib/autoload.php';
 
 use Hlquery\Client;
-
 $client = new Client(getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200'));
 ```
 
@@ -92,7 +91,38 @@ $collections = $client->listCollections(0, 10);
 print_r($collections->getBody());
 ```
 
+### Collections
+
+List collections with pagination and iterate over the result:
+
+```php
+$response = $client->listCollections(0, 100);
+
+if (!$response->isSuccess()) {
+    throw new RuntimeException('Failed to list collections: ' . $response->getStatusCode());
+}
+
+$body = $response->getBody();
+$collections = $body['collections'] ?? [];
+
+foreach ($collections as $collection) {
+    $name = is_array($collection) ? ($collection['name'] ?? '') : $collection;
+
+    if ($name === '') {
+        continue;
+    }
+
+    echo $name . PHP_EOL;
+}
+```
+
 ### SAM
+
+The PHP client exposes all current SAM endpoints through `Client::sam()`:
+
+- `search($collectionName, $query, $params = [])` calls `GET /sam/search`.
+- `status($collectionName = null, $params = [])` calls `GET /sam/status`.
+- `history($collectionName = null, $limit = 100, $params = [])` calls `GET /sam/history`.
 
 Use the SAM service for search, background status, and recent query history:
 
@@ -138,9 +168,3 @@ $moduleResponse = $client->executeRequest('GET', '/modules/<name>/<route>', null
 
 print_r($moduleResponse->getBody());
 ```
-
-### Notes
-
-- Base URL defaults to `http://localhost:9200`.
-- The client stays framework-agnostic.
-- See `etc/api/php/example.php` and the language-specific examples in this repo for more complete flows.
