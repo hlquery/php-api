@@ -7,7 +7,7 @@
 **A modular PHP client library for hlquery, designed with a familiar and intuitive API structure.**
 
 [![Follow hlquery](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white)](https://x.com/hlquery)
-[![PHP API CI](https://github.com/hlquery/php-api/actions/workflows/ci.yml/badge.svg)](https://github.com/hlquery/php-api/actions/workflows/ci.yml)
+[![PHP API CI](https://img.shields.io/github/actions/workflow/status/hlquery/php-api/ci.yml?branch=main&label=PHP%20API%20CI&color=purple)](https://github.com/hlquery/php-api/actions/workflows/ci.yml)
 [![Commit Activity](https://img.shields.io/github/commit-activity/m/hlquery/hlquery)](https://github.com/hlquery/php-api/pulse)
 [![GitHub](https://img.shields.io/badge/GitHub-php--api-181717?logo=github&logoColor=white)](https://github.com/hlquery/php-api/stargazers)
 [![hlquery](https://img.shields.io/badge/GitHub-hlquery-blue?logo=github&logoColor=white)](https://github.com/hlquery/hlquery/stargazers)
