@@ -8,7 +8,6 @@
 
 [![Follow hlquery](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white)](https://x.com/hlquery)
 [![PHP build](https://github.com/hlquery/php-api/actions/workflows/ci.yml/badge.svg)](https://github.com/hlquery/php-api/actions/workflows/ci.yml)
-[![Commit Activity](https://img.shields.io/github/commit-activity/m/hlquery/hlquery)](https://github.com/hlquery/php-api/pulse)
 [![GitHub](https://img.shields.io/badge/GitHub-php--api-purple?logo=github&logoColor=white)](https://github.com/hlquery/php-api/stargazers)
 [![hlquery](https://img.shields.io/badge/GitHub-hlquery-blue?logo=github&logoColor=white)](https://github.com/hlquery/hlquery/stargazers)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
