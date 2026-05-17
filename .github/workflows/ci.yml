@@ -30,3 +30,6 @@ jobs:
 
       - name: Run offline smoke tests
         run: php test/offline-smoke.php
+
+      - name: Run PHP tests
+        run: php tests/run.php
