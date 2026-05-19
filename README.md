@@ -24,10 +24,6 @@ The library wraps hlquery's HTTP endpoints in a service-based API so you can cre
 
 Use the PHP API when you want hlquery integration to feel like part of your application instead of a pile of hand-written REST calls. It reduces boilerplate, keeps authentication and request formatting consistent, and makes common operations easier to read and maintain.
 
-### Why choose it over raw HTTP?
-
-Choose the PHP client over raw HTTP when you want less boilerplate around search, indexing, and admin operations, one consistent client for auth, params, headers, and response parsing, and direct access to collections, documents, SQL, overrides, synonyms, stopwords, and SAM. It also works in plain PHP with no framework requirement.
-
 ### Install
 
 Requirements:
@@ -39,7 +35,7 @@ Requirements:
 Composer:
 
 ```bash
-composer require hlquery/php-client
+$ composer require hlquery/php-client
 ```
 
 Local usage:
@@ -123,6 +119,12 @@ The PHP client exposes all current SAM endpoints through `Client::sam()`:
 - `search($collectionName, $query, $params = [])` calls `GET /sam/search`.
 - `status($collectionName = null, $params = [])` calls `GET /sam/status`.
 - `history($collectionName = null, $limit = 100, $params = [])` calls `GET /sam/history`.
+
+You can also use the convenience property accessor `$client->sam` (same object as `$client->sam()`):
+
+```php
+$status = $client->sam->status('music');
+```
 
 Use the SAM service for search, background status, and recent query history:
 

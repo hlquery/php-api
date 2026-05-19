@@ -16,6 +16,31 @@ class Client
      private $sql_service;
      private $sam_service;
 
+     public function __get($name)
+     {
+          switch ($name)
+          {
+               case 'collections':
+                    return $this->collections();
+               case 'documents':
+                    return $this->documents();
+               case 'keys':
+                    return $this->keys();
+               case 'sql':
+                    return $this->sql();
+               case 'sam':
+                    return $this->sam();
+          }
+
+          trigger_error('Undefined property: ' . __CLASS__ . '::$' . (string) $name, E_USER_NOTICE);
+          return null;
+     }
+
+     public function __isset($name)
+     {
+          return in_array($name, ['collections', 'documents', 'keys', 'sql', 'sam'], true);
+     }
+
      public function __construct($base_url = null, array $options = [])
      {
           $merged_options = \Hlquery\Utils\Config::mergeDefaults($options);
