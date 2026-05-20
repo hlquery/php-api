@@ -9,8 +9,15 @@ require_once __DIR__ . '/../lib/autoload.php';
 
 use Hlquery\Client;
 
+$baseUrl = $argv[1] ?? (getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200'));
+$token = $argv[2] ?? (getenv('HLQUERY_TOKEN') ?: null);
+
 // Initialize client
-$client = new Client('http://localhost:9200');
+$client = new Client($baseUrl);
+
+if ($token) {
+    $client->setAuthToken($token, 'bearer');
+}
 
 // Health check
 $health = $client->health();
@@ -25,10 +32,4 @@ if ($collections->isSuccess()) {
     echo "Found $count collections\n";
 }
 
-// With authentication
-$authenticatedClient = new Client('http://localhost:9200', [
-    'token' => 'your_token_here'
-]);
-
-// Or set token dynamically
-$client->setAuthToken('your_token_here', 'bearer');
+echo "Base URL: {$baseUrl}\n";

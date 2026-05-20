@@ -9,7 +9,15 @@ require_once __DIR__ . '/../lib/autoload.php';
 
 use Hlquery\Client;
 
-$client = new Client('http://localhost:9200');
+$baseUrl = $argv[1] ?? (getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200'));
+$token = $argv[2] ?? (getenv('HLQUERY_TOKEN') ?: null);
+$client = new Client($baseUrl);
+
+if ($token) {
+    $client->setAuthToken($token, 'bearer');
+}
+
+$exampleCollection = 'php_collections_example_' . getmypid();
 
 // List collections
 $collections = $client->collections()->list(0, 10);
@@ -40,9 +48,9 @@ $schema = [
         ['name' => 'embedding', 'type' => 'float[]']
     ]
 ];
-$createResult = $client->collections()->create('new_collection', $schema);
+$createResult = $client->collections()->create($exampleCollection, $schema);
 echo "Create result: " . json_encode($createResult->getBody(), JSON_PRETTY_PRINT) . "\n";
 
 // Delete collection
-$deleteResult = $client->collections()->delete('collection_name');
+$deleteResult = $client->collections()->delete($exampleCollection);
 echo "Delete result: " . json_encode($deleteResult->getBody(), JSON_PRETTY_PRINT) . "\n";

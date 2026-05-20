@@ -611,7 +611,9 @@ if ($command === 'all' || $command === 'docs' || $command === 'open') {
             printResult("DELETE /collections/{name}/documents/{id}", $deleteResult);
             
             // DELETE /collections/{name}/documents (by filter)
-            $deleteByFilterResult = $client->documents()->deleteByFilter($testCollection, 'title:Bulk*');
+            $deleteByFilterResult = $client->documents()->deleteByFilter($testCollection, [
+                'filter_by' => 'title:Bulk*'
+            ]);
             printResult("DELETE /collections/{name}/documents (by filter)", $deleteByFilterResult);
         }
         

@@ -9,8 +9,30 @@ require_once __DIR__ . '/../lib/autoload.php';
 
 use Hlquery\Client;
 
-$client = new Client('http://localhost:9200');
-$collection = 'collection_name';
+$baseUrl = $argv[1] ?? (getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200'));
+$token = $argv[2] ?? (getenv('HLQUERY_TOKEN') ?: null);
+$collection = $argv[3] ?? 'php_search_example_' . getmypid();
+$client = new Client($baseUrl);
+
+if ($token) {
+    $client->setAuthToken($token, 'bearer');
+}
+
+$client->collections()->delete($collection);
+$client->collections()->create($collection, [
+    'fields' => [
+        ['name' => 'title', 'type' => 'string'],
+        ['name' => 'content', 'type' => 'string'],
+        ['name' => 'category', 'type' => 'string'],
+        ['name' => 'price', 'type' => 'float'],
+        ['name' => 'embedding', 'type' => 'float[]'],
+    ],
+]);
+$client->documents()->import($collection, [
+    ['id' => 'prod_laptop_001', 'title' => 'Laptop Computer', 'content' => 'Portable work machine', 'category' => 'electronics', 'price' => 1299.99, 'embedding' => [0.1, 0.2, 0.3, 0.4, 0.5]],
+    ['id' => 'prod_keyboard_001', 'title' => 'Wireless Keyboard', 'content' => 'Compact Bluetooth keyboard', 'category' => 'electronics', 'price' => 49.99, 'embedding' => [0.2, 0.1, 0.4, 0.3, 0.5]],
+    ['id' => 'prod_notebook_001', 'title' => 'Paper Notebook', 'content' => 'Plain paper writing notebook', 'category' => 'office', 'price' => 9.99, 'embedding' => [0.5, 0.4, 0.3, 0.2, 0.1]],
+]);
 
 // Simple search
 $results = $client->search($collection, [
@@ -115,7 +137,9 @@ echo "Vector results: " . json_encode($vectorResults->getBody(), JSON_PRETTY_PRI
 
 // Multi-search
 $multiResults = $client->searchApi()->multiSearch([
-    ['collection' => 'col1', 'q' => 'query1', 'query_by' => 'title'],
-    ['collection' => 'col2', 'q' => 'query2', 'query_by' => 'content']
+    ['collection' => $collection, 'q' => 'laptop', 'query_by' => 'title'],
+    ['collection' => $collection, 'q' => 'keyboard', 'query_by' => 'content']
 ]);
 echo "Multi-search results: " . json_encode($multiResults->getBody(), JSON_PRETTY_PRINT) . "\n";
+
+$client->collections()->delete($collection);

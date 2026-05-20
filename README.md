@@ -149,8 +149,8 @@ print_r($results->getBody());
 ```php
 $sql = $client->sql();
 
-$rows = $sql->query('SHOW COLLECTIONS;');
-$books = $sql->search(
+$rows = $sql->raw('SHOW COLLECTIONS;');
+$books = $sql->query(
     'books',
     'SELECT id, title FROM books ORDER BY title ASC LIMIT 3;'
 );

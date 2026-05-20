@@ -146,7 +146,10 @@ if (!$testCollection) {
         // Check if collection was created successfully
         if ($createResponse->getStatusCode() === 200 || $createResponse->getStatusCode() === 201) {
             // Extract collection name from response
-            $responseBody = json_decode($createResponse->getBody(), true);
+            $responseBody = $createResponse->getBody();
+            if (!is_array($responseBody)) {
+                $responseBody = json_decode((string) $responseBody, true) ?: [];
+            }
             $testCollection = $responseBody['name'] ?? 'test_synstop_' . time();
             echo "Created collection: $testCollection\n\n";
         } else {
