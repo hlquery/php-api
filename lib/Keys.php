@@ -32,7 +32,7 @@ class Keys extends Service
 
      public function update($key_id, array $payload)
      {
-          return $this->client->executeRequest('PATCH', '/keys/' . rawurlencode((string) $key_id), $payload);
+          return $this->client->executeRequest('PUT', '/keys/' . rawurlencode((string) $key_id), $payload);
      }
 
      public function delete($key_id)

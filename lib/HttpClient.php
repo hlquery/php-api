@@ -26,7 +26,7 @@ class HttpClient
           $this->auth_method = $auth_method ?: 'bearer';
      }
 
-     public function request($method, $path, $payload = null, array $query = [])
+     public function request($method, $path, $payload = null, array $query = [], array $extra_headers = [])
      {
           $url = $this->buildUrl($path, $query);
           $headers = [
@@ -45,6 +45,17 @@ class HttpClient
           {
                $headers[] = 'Content-Type: application/json';
                $body = json_encode($payload);
+          }
+
+          foreach ($extra_headers as $name => $value)
+          {
+               if (is_int($name))
+               {
+                    $headers[] = (string) $value;
+                    continue;
+               }
+
+               $headers[] = (string) $name . ': ' . (string) $value;
           }
 
           $response_headers = [];

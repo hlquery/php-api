@@ -15,6 +15,14 @@ class Client
      private $keys_service;
      private $sql_service;
      private $sam_service;
+     private $synonyms_service;
+     private $stopwords_service;
+     private $overrides_service;
+     private $aliases_service;
+     private $links_service;
+     private $users_service;
+     private $modules_service;
+     private $analytics_service;
 
      public function __get($name)
      {
@@ -30,6 +38,22 @@ class Client
                     return $this->sql();
                case 'sam':
                     return $this->sam();
+               case 'synonyms':
+                    return $this->synonyms();
+               case 'stopwords':
+                    return $this->stopwords();
+               case 'overrides':
+                    return $this->overrides();
+               case 'aliases':
+                    return $this->aliases();
+               case 'links':
+                    return $this->links();
+               case 'users':
+                    return $this->users();
+               case 'modules':
+                    return $this->modules();
+               case 'analytics':
+                    return $this->analytics();
           }
 
           trigger_error('Undefined property: ' . __CLASS__ . '::$' . (string) $name, E_USER_NOTICE);
@@ -38,7 +62,7 @@ class Client
 
      public function __isset($name)
      {
-          return in_array($name, ['collections', 'documents', 'keys', 'sql', 'sam'], true);
+          return in_array($name, ['collections', 'documents', 'keys', 'sql', 'sam', 'synonyms', 'stopwords', 'overrides', 'aliases', 'links', 'users', 'modules', 'analytics'], true);
      }
 
      public function __construct($base_url = null, array $options = [])
@@ -81,9 +105,34 @@ class Client
           return $this->http_client->request($method, $path, $payload, $query);
      }
 
+     public function executeRequestWithHeaders($method, $path, $payload = null, array $query = [], array $headers = [])
+     {
+          return $this->http_client->request($method, $path, $payload, $query, $headers);
+     }
+
      public function health()
      {
           return $this->executeRequest('GET', '/health');
+     }
+
+     public function status()
+     {
+          return $this->executeRequest('GET', '/status');
+     }
+
+     public function query()
+     {
+          return $this->executeRequest('GET', '/query');
+     }
+
+     public function ready()
+     {
+          return $this->executeRequest('GET', '/ready');
+     }
+
+     public function ping()
+     {
+          return $this->executeRequest('GET', '/ping');
      }
 
      public function info()
@@ -94,6 +143,106 @@ class Client
      public function stats()
      {
           return $this->executeRequest('GET', '/stats');
+     }
+
+     public function metrics()
+     {
+          return $this->executeRequest('GET', '/metrics');
+     }
+
+     public function metricsJson()
+     {
+          return $this->executeRequest('GET', '/metrics.json');
+     }
+
+     public function metricsHistory()
+     {
+          return $this->executeRequest('GET', '/metrics/history');
+     }
+
+     public function connections()
+     {
+          return $this->executeRequest('GET', '/connections');
+     }
+
+     public function rocksdb()
+     {
+          return $this->executeRequest('GET', '/rocksdb');
+     }
+
+     public function rocksdbUnderscore()
+     {
+          return $this->executeRequest('GET', '/_rocksdb');
+     }
+
+     public function docTotal()
+     {
+          return $this->executeRequest('GET', '/doctotal');
+     }
+
+     public function searchConfig()
+     {
+          return $this->executeRequest('GET', '/search-config');
+     }
+
+     public function startup()
+     {
+          return $this->executeRequest('GET', '/startup');
+     }
+
+     public function bootStatus()
+     {
+          return $this->executeRequest('GET', '/boot-status');
+     }
+
+     public function llm()
+     {
+          return $this->executeRequest('GET', '/llm');
+     }
+
+     public function integrity()
+     {
+          return $this->executeRequest('GET', '/integrity');
+     }
+
+     public function consistency()
+     {
+          return $this->executeRequest('GET', '/consistency');
+     }
+
+     public function selfCheck()
+     {
+          return $this->executeRequest('GET', '/self-check');
+     }
+
+     public function storageStatus()
+     {
+          return $this->executeRequest('GET', '/admin/storage_status');
+     }
+
+     public function flush()
+     {
+          return $this->executeRequest('POST', '/flush');
+     }
+
+     public function repair(array $payload = null, array $query = [])
+     {
+          return $this->executeRequest($payload === null ? 'GET' : 'POST', '/repair', $payload, $query);
+     }
+
+     public function updateCounters(array $payload = null, array $query = [])
+     {
+          return $this->executeRequest($payload === null ? 'GET' : 'POST', '/update-counters', $payload, $query);
+     }
+
+     public function debugCounters()
+     {
+          return $this->executeRequest('GET', '/debug/counters');
+     }
+
+     public function etc()
+     {
+          return $this->executeRequest('GET', '/etc');
      }
 
      public function collections()
@@ -146,6 +295,86 @@ class Client
           return $this->sam_service;
      }
 
+     public function synonyms()
+     {
+          if ($this->synonyms_service === null)
+          {
+               $this->synonyms_service = new Synonyms($this);
+          }
+
+          return $this->synonyms_service;
+     }
+
+     public function stopwords()
+     {
+          if ($this->stopwords_service === null)
+          {
+               $this->stopwords_service = new Stopwords($this);
+          }
+
+          return $this->stopwords_service;
+     }
+
+     public function overrides()
+     {
+          if ($this->overrides_service === null)
+          {
+               $this->overrides_service = new Overrides($this);
+          }
+
+          return $this->overrides_service;
+     }
+
+     public function aliases()
+     {
+          if ($this->aliases_service === null)
+          {
+               $this->aliases_service = new Aliases($this);
+          }
+
+          return $this->aliases_service;
+     }
+
+     public function links()
+     {
+          if ($this->links_service === null)
+          {
+               $this->links_service = new Links($this);
+          }
+
+          return $this->links_service;
+     }
+
+     public function users()
+     {
+          if ($this->users_service === null)
+          {
+               $this->users_service = new Users($this);
+          }
+
+          return $this->users_service;
+     }
+
+     public function modules()
+     {
+          if ($this->modules_service === null)
+          {
+               $this->modules_service = new Modules($this);
+          }
+
+          return $this->modules_service;
+     }
+
+     public function analytics()
+     {
+          if ($this->analytics_service === null)
+          {
+               $this->analytics_service = new Analytics($this);
+          }
+
+          return $this->analytics_service;
+     }
+
      public function searchApi()
      {
           return $this;
@@ -186,8 +415,25 @@ class Client
           return $this->executeRequest('POST', '/multi_search', $payload);
      }
 
+     public function multiSearchGet(array $params = [])
+     {
+          return $this->executeRequest('GET', '/multi_search', null, $params);
+     }
+
+     public function globalSearch(array $params, $method = 'GET')
+     {
+          $method = strtoupper((string) $method);
+
+          if ($method === 'POST')
+          {
+               return $this->executeRequest('POST', '/search', $params);
+          }
+
+          return $this->executeRequest('GET', '/search', null, $params);
+     }
+
      public function vectorSearch($collection_name, array $params)
      {
-          return $this->search($collection_name, $params);
+          return $this->collections()->vectorSearch($collection_name, $params);
      }
 }

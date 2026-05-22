@@ -22,6 +22,11 @@ class Collections extends Service
           );
      }
 
+     public function distributed(array $params = [])
+     {
+          return $this->client->executeRequest('GET', '/collections/distributed', null, $params);
+     }
+
      public function create($collection_name, array $schema)
      {
           \Hlquery\Utils\Validator::validateCollectionName($collection_name);
@@ -49,6 +54,43 @@ class Collections extends Service
           \Hlquery\Utils\Validator::validateCollectionName($collection_name);
 
           return $this->client->executeRequest('GET', '/collections/' . rawurlencode($collection_name) . '/fields');
+     }
+
+     public function language($collection_name)
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          return $this->client->executeRequest('GET', '/collections/' . rawurlencode($collection_name) . '/lang');
+     }
+
+     public function vectorSearch($collection_name, array $params, $method = 'GET')
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          $path = '/collections/' . rawurlencode($collection_name) . '/vector_search';
+          $method = strtoupper((string) $method);
+
+          if ($method === 'POST')
+          {
+               return $this->client->executeRequest('POST', $path, $params);
+          }
+
+          return $this->client->executeRequest('GET', $path, null, $params);
+     }
+
+     public function searchAlias($collection_name, array $params, $method = 'GET')
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          $path = '/collections/' . rawurlencode($collection_name) . '/search';
+          $method = strtoupper((string) $method);
+
+          if ($method === 'POST')
+          {
+               return $this->client->executeRequest('POST', $path, $params);
+          }
+
+          return $this->client->executeRequest('GET', $path, null, $params);
      }
 
      public function update($collection_name, array $schema)

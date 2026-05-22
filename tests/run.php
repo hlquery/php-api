@@ -320,7 +320,7 @@ run('Keys service request shape', function (): void {
     assertSame(['name' => 'k'], $client->lastPayload, 'Keys::create payload mismatch');
 
     $client->keys()->update('id', ['role' => 'rw']);
-    assertSame('PATCH', $client->lastMethod, 'Keys::update should use PATCH');
+    assertSame('PUT', $client->lastMethod, 'Keys::update should use PUT');
     assertSame('/keys/id', $client->lastPath, 'Keys::update path mismatch');
     assertSame(['role' => 'rw'], $client->lastPayload, 'Keys::update payload mismatch');
 
@@ -373,6 +373,124 @@ run('Client convenience methods delegate', function (): void {
     assertSame('POST', $client->lastMethod, 'Client::multiSearch should use POST');
     assertSame('/multi_search', $client->lastPath, 'Client::multiSearch path mismatch');
     assertSame(['queries' => []], $client->lastPayload, 'Client::multiSearch payload mismatch');
+});
+
+run('Extended client service accessors', function (): void {
+    $client = new TestClient('http://localhost:9200');
+    assertTrue($client->synonyms() instanceof Hlquery\Synonyms, 'Client::synonyms should return Synonyms service');
+    assertTrue($client->stopwords() instanceof Hlquery\Stopwords, 'Client::stopwords should return Stopwords service');
+    assertTrue($client->overrides() instanceof Hlquery\Overrides, 'Client::overrides should return Overrides service');
+    assertTrue($client->aliases() instanceof Hlquery\Aliases, 'Client::aliases should return Aliases service');
+    assertTrue($client->links() instanceof Hlquery\Links, 'Client::links should return Links service');
+    assertTrue($client->users() instanceof Hlquery\Users, 'Client::users should return Users service');
+    assertTrue($client->modules() instanceof Hlquery\Modules, 'Client::modules should return Modules service');
+    assertTrue($client->analytics() instanceof Hlquery\Analytics, 'Client::analytics should return Analytics service');
+});
+
+run('Extended route wrappers shape requests', function (): void {
+    $client = new TestClient('http://localhost:9200');
+
+    $client->ready();
+    assertSame('GET', $client->lastMethod, 'Client::ready should use GET');
+    assertSame('/ready', $client->lastPath, 'Client::ready path mismatch');
+
+    $client->status();
+    assertSame('/status', $client->lastPath, 'Client::status path mismatch');
+
+    $client->query();
+    assertSame('/query', $client->lastPath, 'Client::query path mismatch');
+
+    $client->bootStatus();
+    assertSame('/boot-status', $client->lastPath, 'Client::bootStatus path mismatch');
+
+    $client->consistency();
+    assertSame('/consistency', $client->lastPath, 'Client::consistency path mismatch');
+
+    $client->metricsJson();
+    assertSame('/metrics.json', $client->lastPath, 'Client::metricsJson path mismatch');
+
+    $client->rocksdbUnderscore();
+    assertSame('/_rocksdb', $client->lastPath, 'Client::rocksdbUnderscore path mismatch');
+
+    $client->collections()->language('books');
+    assertSame('/collections/books/lang', $client->lastPath, 'Collections::language path mismatch');
+
+    $client->collections()->distributed(['ping' => 1]);
+    assertSame('/collections/distributed', $client->lastPath, 'Collections::distributed path mismatch');
+    assertSame(['ping' => 1], $client->lastQuery, 'Collections::distributed query mismatch');
+
+    $client->collections()->vectorSearch('books', ['vector' => [1, 2]], 'POST');
+    assertSame('POST', $client->lastMethod, 'Collections::vectorSearch POST should use POST');
+    assertSame('/collections/books/vector_search', $client->lastPath, 'Collections::vectorSearch path mismatch');
+
+    $client->collections()->searchAlias('books', ['vector' => [1, 2]]);
+    assertSame('GET', $client->lastMethod, 'Collections::searchAlias should use GET by default');
+    assertSame('/collections/books/search', $client->lastPath, 'Collections::searchAlias path mismatch');
+
+    $client->documents()->updateByQuery('books', ['filter' => 'x']);
+    assertSame('/collections/books/documents/_update_by_query', $client->lastPath, 'Documents::updateByQuery path mismatch');
+
+    $client->documents()->deleteByQuery('books', ['filter' => 'x']);
+    assertSame('/collections/books/documents/_delete_by_query', $client->lastPath, 'Documents::deleteByQuery path mismatch');
+
+    $client->documents()->context('books', 'doc-1');
+    assertSame('/collections/books/documents/doc-1/context', $client->lastPath, 'Documents::context path mismatch');
+
+    $client->sam()->addDocumentLabel('books', 'doc-1', 'queen of pop');
+    assertSame('POST', $client->lastMethod, 'SAM::addDocumentLabel should use POST');
+    assertSame('/sam/label/add/books/doc-1', $client->lastPath, 'SAM::addDocumentLabel path mismatch');
+    assertSame(['label' => 'queen of pop'], $client->lastPayload, 'SAM::addDocumentLabel payload mismatch');
+});
+
+run('Resource services shape requests', function (): void {
+    $client = new TestClient('http://localhost:9200');
+
+    $client->synonyms()->upsert('books', 'car', ['synonyms' => ['auto']]);
+    assertSame('PUT', $client->lastMethod, 'Synonyms::upsert should use PUT');
+    assertSame('/collections/books/synonyms/car', $client->lastPath, 'Synonyms::upsert path mismatch');
+
+    $client->stopwords()->create('books', ['word' => 'the']);
+    assertSame('POST', $client->lastMethod, 'Stopwords::create should use POST');
+    assertSame('/collections/books/stopwords', $client->lastPath, 'Stopwords::create path mismatch');
+
+    $client->overrides()->get('books', 'ovr-1');
+    assertSame('GET', $client->lastMethod, 'Overrides::get should use GET');
+    assertSame('/collections/books/overrides/ovr-1', $client->lastPath, 'Overrides::get path mismatch');
+
+    $client->aliases()->upsert('alias_1', ['collection' => 'books']);
+    assertSame('PUT', $client->lastMethod, 'Aliases::upsert should use PUT');
+    assertSame('/aliases/alias_1', $client->lastPath, 'Aliases::upsert path mismatch');
+
+    $client->links()->connect('127.0.0.1:9201');
+    assertSame('POST', $client->lastMethod, 'Links::connect should use POST');
+    assertSame('/links/connect', $client->lastPath, 'Links::connect path mismatch');
+    assertSame(['endpoint' => '127.0.0.1:9201'], $client->lastPayload, 'Links::connect payload mismatch');
+
+    $client->users()->update('u1', ['role' => 'admin']);
+    assertSame('PUT', $client->lastMethod, 'Users::update should use PUT');
+    assertSame('/users/u1', $client->lastPath, 'Users::update path mismatch');
+
+    $client->modules()->syntax('ranker');
+    assertSame('GET', $client->lastMethod, 'Modules::syntax should use GET');
+    assertSame('/modules/ranker/syntax', $client->lastPath, 'Modules::syntax path mismatch');
+
+    $client->analytics()->click(['collection' => 'books']);
+    assertSame('POST', $client->lastMethod, 'Analytics::click should use POST');
+    assertSame('/analytics/click', $client->lastPath, 'Analytics::click path mismatch');
+
+    $client->modules()->loadWithPayload(['module' => 'ranker']);
+    assertSame('POST', $client->lastMethod, 'Modules::loadWithPayload should use POST');
+    assertSame('/loadmodule', $client->lastPath, 'Modules::loadWithPayload path mismatch');
+
+    $client->sql()->queryGet('books', 'select * from books');
+    assertSame('GET', $client->lastMethod, 'SQL::queryGet should use GET');
+    assertSame('/sql', $client->lastPath, 'SQL::queryGet path mismatch');
+    assertSame(['collection' => 'books', 'q' => 'select * from books'], $client->lastQuery, 'SQL::queryGet query mismatch');
+
+    $client->multiSearchGet(['q' => 'x']);
+    assertSame('GET', $client->lastMethod, 'Client::multiSearchGet should use GET');
+    assertSame('/multi_search', $client->lastPath, 'Client::multiSearchGet path mismatch');
+    assertSame(['q' => 'x'], $client->lastQuery, 'Client::multiSearchGet query mismatch');
 });
 
 run('Response getMessage behavior', function (): void {

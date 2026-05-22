@@ -142,6 +142,98 @@ class Documents extends Service
           );
      }
 
+     public function searchPost($collection_name, array $payload)
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+          \Hlquery\Utils\Validator::validateSearchParams($payload);
+
+          return $this->client->executeRequest(
+               'POST',
+               '/collections/' . rawurlencode($collection_name) . '/documents/search',
+               $payload
+          );
+     }
+
+     public function context($collection_name, $document_id, array $params = [])
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+          \Hlquery\Utils\Validator::validateDocumentId($document_id);
+
+          return $this->client->executeRequest(
+               'GET',
+               '/collections/' . rawurlencode($collection_name) . '/documents/' . rawurlencode($document_id) . '/context',
+               null,
+               $params
+          );
+     }
+
+     public function updateByQuery($collection_name, array $payload)
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          return $this->client->executeRequest(
+               'POST',
+               '/collections/' . rawurlencode($collection_name) . '/documents/_update_by_query',
+               $payload
+          );
+     }
+
+     public function deleteByQuery($collection_name, array $payload)
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          return $this->client->executeRequest(
+               'POST',
+               '/collections/' . rawurlencode($collection_name) . '/documents/_delete_by_query',
+               $payload
+          );
+     }
+
+     public function facets($collection_name, array $params = [], $method = 'GET')
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          $path = '/collections/' . rawurlencode($collection_name) . '/documents/facet_counts';
+          $method = strtoupper((string) $method);
+
+          if ($method === 'POST')
+          {
+               return $this->client->executeRequest('POST', $path, $params);
+          }
+
+          return $this->client->executeRequest('GET', $path, null, $params);
+     }
+
+     public function export($collection_name, array $params = [], $method = 'GET')
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          $path = '/collections/' . rawurlencode($collection_name) . '/documents/export';
+          $method = strtoupper((string) $method);
+
+          if ($method === 'POST')
+          {
+               return $this->client->executeRequest('POST', $path, $params);
+          }
+
+          return $this->client->executeRequest('GET', $path, null, $params);
+     }
+
+     public function maybe($collection_name, array $params = [], $method = 'GET')
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          $path = '/collections/' . rawurlencode($collection_name) . '/documents/maybe';
+          $method = strtoupper((string) $method);
+
+          if ($method === 'POST')
+          {
+               return $this->client->executeRequest('POST', $path, $params);
+          }
+
+          return $this->client->executeRequest('GET', $path, null, $params);
+     }
+
      public function copy($collection_name, $source_id, $target_id)
      {
           \Hlquery\Utils\Validator::validateCollectionName($collection_name);
