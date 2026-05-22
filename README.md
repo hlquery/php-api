@@ -8,8 +8,8 @@
 
 [![Follow hlquery](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white&labelColor=000000)](https://x.com/hlquery)
 [![PHP build](https://img.shields.io/badge/PHP%20build-passing-brightgreen?logo=php&logoColor=white&labelColor=000000)](https://github.com/hlquery/php-api/actions/workflows/ci.yml)
-[![php-api](https://img.shields.io/badge/GitHub-php--api-purple?logo=github&logoColor=white&labelColor=000000)](https://github.com/hlquery/php-api/stargazers)
-[![hlquery](https://img.shields.io/badge/GitHub-hlquery-blue?logo=github&logoColor=white&labelColor=000000)](https://github.com/hlquery/hlquery/stargazers)
+[![php-api](https://img.shields.io/badge/GitHub-php--api-purple?logo=github&logoColor=white&labelColor=000000)](https://github.com/hlquery/php-api/)
+[![hlquery](https://img.shields.io/badge/GitHub-hlquery-blue?logo=github&logoColor=white&labelColor=000000)](https://github.com/hlquery/hlquery/)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-a35a0f?logo=open-source-initiative&logoColor=white&labelColor=000000)](https://opensource.org/licenses/BSD-3-Clause)
 
 </div>
