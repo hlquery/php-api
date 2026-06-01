@@ -32,6 +32,16 @@ class Modules extends Service
           return $this->client->executeRequest('POST', '/unloadmodule', $payload);
      }
 
+     public function loadAlias($module)
+     {
+          return $this->client->executeRequest('POST', '/modules/load/' . rawurlencode((string) $module));
+     }
+
+     public function unloadAlias($module)
+     {
+          return $this->client->executeRequest('POST', '/modules/unload/' . rawurlencode((string) $module));
+     }
+
      public function syntax($module)
      {
           return $this->client->executeRequest('GET', '/modules/' . rawurlencode((string) $module) . '/syntax');

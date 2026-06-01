@@ -160,6 +160,11 @@ class Client
           return $this->executeRequest('GET', '/metrics/history');
      }
 
+     public function metricsHistoryAlias()
+     {
+          return $this->executeRequest('GET', '/metrics-history');
+     }
+
      public function connections()
      {
           return $this->executeRequest('GET', '/connections');

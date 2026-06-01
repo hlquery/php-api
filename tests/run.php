@@ -409,6 +409,9 @@ run('Extended route wrappers shape requests', function (): void {
     $client->metricsJson();
     assertSame('/metrics.json', $client->lastPath, 'Client::metricsJson path mismatch');
 
+    $client->metricsHistoryAlias();
+    assertSame('/metrics-history', $client->lastPath, 'Client::metricsHistoryAlias path mismatch');
+
     $client->rocksdbUnderscore();
     assertSame('/_rocksdb', $client->lastPath, 'Client::rocksdbUnderscore path mismatch');
 
@@ -449,6 +452,22 @@ run('Resource services shape requests', function (): void {
     assertSame('PUT', $client->lastMethod, 'Synonyms::upsert should use PUT');
     assertSame('/collections/books/synonyms/car', $client->lastPath, 'Synonyms::upsert path mismatch');
 
+    $client->synonyms()->create('books', 'truck', ['synonyms' => ['lorry']]);
+    assertSame('POST', $client->lastMethod, 'Synonyms::create should use POST');
+    assertSame('/collections/books/synonyms/truck', $client->lastPath, 'Synonyms::create path mismatch');
+
+    $client->synonyms()->update('books', 'truck', ['synonyms' => ['pickup']]);
+    assertSame('PUT', $client->lastMethod, 'Synonyms::update should use PUT');
+    assertSame('/collections/books/synonyms/truck', $client->lastPath, 'Synonyms::update path mismatch');
+
+    $client->synonyms()->createGlobal('car', ['synonyms' => ['auto']]);
+    assertSame('POST', $client->lastMethod, 'Synonyms::createGlobal should use POST');
+    assertSame('/synonyms/global/car', $client->lastPath, 'Synonyms::createGlobal path mismatch');
+
+    $client->synonyms()->updateGlobal('car', ['synonyms' => ['vehicle']]);
+    assertSame('PUT', $client->lastMethod, 'Synonyms::updateGlobal should use PUT');
+    assertSame('/synonyms/global/car', $client->lastPath, 'Synonyms::updateGlobal path mismatch');
+
     $client->stopwords()->create('books', ['word' => 'the']);
     assertSame('POST', $client->lastMethod, 'Stopwords::create should use POST');
     assertSame('/collections/books/stopwords', $client->lastPath, 'Stopwords::create path mismatch');
@@ -457,9 +476,25 @@ run('Resource services shape requests', function (): void {
     assertSame('GET', $client->lastMethod, 'Overrides::get should use GET');
     assertSame('/collections/books/overrides/ovr-1', $client->lastPath, 'Overrides::get path mismatch');
 
+    $client->overrides()->create('books', 'ovr-2', ['rule' => 'create']);
+    assertSame('POST', $client->lastMethod, 'Overrides::create should use POST');
+    assertSame('/collections/books/overrides/ovr-2', $client->lastPath, 'Overrides::create path mismatch');
+
+    $client->overrides()->update('books', 'ovr-2', ['rule' => 'update']);
+    assertSame('PUT', $client->lastMethod, 'Overrides::update should use PUT');
+    assertSame('/collections/books/overrides/ovr-2', $client->lastPath, 'Overrides::update path mismatch');
+
     $client->aliases()->upsert('alias_1', ['collection' => 'books']);
     assertSame('PUT', $client->lastMethod, 'Aliases::upsert should use PUT');
     assertSame('/aliases/alias_1', $client->lastPath, 'Aliases::upsert path mismatch');
+
+    $client->aliases()->create('alias_2', ['collection' => 'books']);
+    assertSame('POST', $client->lastMethod, 'Aliases::create should use POST');
+    assertSame('/aliases/alias_2', $client->lastPath, 'Aliases::create path mismatch');
+
+    $client->aliases()->update('alias_2', ['collection' => 'books']);
+    assertSame('PUT', $client->lastMethod, 'Aliases::update should use PUT');
+    assertSame('/aliases/alias_2', $client->lastPath, 'Aliases::update path mismatch');
 
     $client->links()->connect('127.0.0.1:9201');
     assertSame('POST', $client->lastMethod, 'Links::connect should use POST');
@@ -481,6 +516,14 @@ run('Resource services shape requests', function (): void {
     $client->modules()->loadWithPayload(['module' => 'ranker']);
     assertSame('POST', $client->lastMethod, 'Modules::loadWithPayload should use POST');
     assertSame('/loadmodule', $client->lastPath, 'Modules::loadWithPayload path mismatch');
+
+    $client->modules()->loadAlias('ranker');
+    assertSame('POST', $client->lastMethod, 'Modules::loadAlias should use POST');
+    assertSame('/modules/load/ranker', $client->lastPath, 'Modules::loadAlias path mismatch');
+
+    $client->modules()->unloadAlias('ranker');
+    assertSame('POST', $client->lastMethod, 'Modules::unloadAlias should use POST');
+    assertSame('/modules/unload/ranker', $client->lastPath, 'Modules::unloadAlias path mismatch');
 
     $client->sql()->queryGet('books', 'select * from books');
     assertSame('GET', $client->lastMethod, 'SQL::queryGet should use GET');

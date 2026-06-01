@@ -21,6 +21,22 @@ class Overrides extends Service
 
      public function upsert($collection_name, $override_id, array $payload)
      {
+          return $this->update($collection_name, $override_id, $payload);
+     }
+
+     public function create($collection_name, $override_id, array $payload)
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          return $this->client->executeRequest(
+               'POST',
+               '/collections/' . rawurlencode($collection_name) . '/overrides/' . rawurlencode((string) $override_id),
+               $payload
+          );
+     }
+
+     public function update($collection_name, $override_id, array $payload)
+     {
           \Hlquery\Utils\Validator::validateCollectionName($collection_name);
 
           return $this->client->executeRequest(

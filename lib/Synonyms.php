@@ -26,6 +26,22 @@ class Synonyms extends Service
 
      public function upsert($collection_name, $term, array $payload)
      {
+          return $this->update($collection_name, $term, $payload);
+     }
+
+     public function create($collection_name, $term, array $payload)
+     {
+          \Hlquery\Utils\Validator::validateCollectionName($collection_name);
+
+          return $this->client->executeRequest(
+               'POST',
+               '/collections/' . rawurlencode($collection_name) . '/synonyms/' . rawurlencode((string) $term),
+               $payload
+          );
+     }
+
+     public function update($collection_name, $term, array $payload)
+     {
           \Hlquery\Utils\Validator::validateCollectionName($collection_name);
 
           return $this->client->executeRequest(
@@ -61,6 +77,20 @@ class Synonyms extends Service
      }
 
      public function upsertGlobal($term, array $payload)
+     {
+          return $this->updateGlobal($term, $payload);
+     }
+
+     public function createGlobal($term, array $payload)
+     {
+          return $this->client->executeRequest(
+               'POST',
+               '/synonyms/global/' . rawurlencode((string) $term),
+               $payload
+          );
+     }
+
+     public function updateGlobal($term, array $payload)
      {
           return $this->client->executeRequest(
                'PUT',

@@ -26,6 +26,18 @@ class Aliases extends Service
 
      public function upsert($alias, array $payload)
      {
+          return $this->update($alias, $payload);
+     }
+
+     public function create($alias, array $payload)
+     {
+          \Hlquery\Utils\Validator::validateAliasName($alias);
+
+          return $this->client->executeRequest('POST', '/aliases/' . rawurlencode((string) $alias), $payload);
+     }
+
+     public function update($alias, array $payload)
+     {
           \Hlquery\Utils\Validator::validateAliasName($alias);
 
           return $this->client->executeRequest('PUT', '/aliases/' . rawurlencode((string) $alias), $payload);
