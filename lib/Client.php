@@ -14,7 +14,6 @@ class Client
      private $documents_service;
      private $keys_service;
      private $sql_service;
-     private $sam_service;
      private $synonyms_service;
      private $stopwords_service;
      private $overrides_service;
@@ -36,8 +35,6 @@ class Client
                     return $this->keys();
                case 'sql':
                     return $this->sql();
-               case 'sam':
-                    return $this->sam();
                case 'synonyms':
                     return $this->synonyms();
                case 'stopwords':
@@ -62,7 +59,7 @@ class Client
 
      public function __isset($name)
      {
-          return in_array($name, ['collections', 'documents', 'keys', 'sql', 'sam', 'synonyms', 'stopwords', 'overrides', 'aliases', 'links', 'users', 'modules', 'analytics'], true);
+          return in_array($name, ['collections', 'documents', 'keys', 'sql', 'synonyms', 'stopwords', 'overrides', 'aliases', 'links', 'users', 'modules', 'analytics'], true);
      }
 
      public function __construct($base_url = null, array $options = [])
@@ -288,16 +285,6 @@ class Client
           }
 
           return $this->sql_service;
-     }
-
-     public function sam()
-     {
-          if ($this->sam_service === null)
-          {
-               $this->sam_service = new SAM($this);
-          }
-
-          return $this->sam_service;
      }
 
      public function synonyms()
