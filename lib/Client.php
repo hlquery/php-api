@@ -197,11 +197,6 @@ class Client
           return $this->executeRequest('GET', '/boot-status');
      }
 
-     public function llm()
-     {
-          return $this->executeRequest('GET', '/llm');
-     }
-
      public function integrity()
      {
           return $this->executeRequest('GET', '/integrity');
