@@ -142,11 +142,10 @@ class Validator {
     }
     
     /*
-     * Validate document field values for invalid characters
-     * Commas are not allowed in string field values as they're reserved for internal parsing
+     * Validate document field names.
      * 
      * @param array|object $document Document object to validate
-     * @throws ValidationException If document contains invalid characters
+     * @throws ValidationException If document contains invalid field names
      */
     public static function validateDocumentFields($document) {
         if (!$document || (!is_array($document) && !is_object($document))) {
@@ -157,30 +156,11 @@ class Validator {
         $docArray = is_object($document) ? (array)$document : $document;
         
         foreach ($docArray as $key => $value) {
-            // Skip the 'id' field as it has its own validation
+            // Skip the 'id' field as it has its own validation.
             if ($key === 'id') continue;
-            
-            // Check string values for commas - skip embedding/vector fields
-            if (is_string($value) && strpos($value, ',') !== false) {
-                // Allow commas in embedding/vector fields for vector search
-                if ($key !== 'embedding' && !preg_match('/_vector$/', $key)) {
-                    throw new \Hlquery\ValidationException(
-                        "Field '{$key}' contains invalid character: comma (`,`). " .
-                        "Commas are not allowed in field values. Use underscores (_) or spaces instead, or use arrays for multiple values."
-                    );
-                }
-            }
-            
-            // Check array values - ensure they don't contain strings with commas
-            if (is_array($value)) {
-                foreach ($value as $item) {
-                    if (is_string($item) && strpos($item, ',') !== false) {
-                        throw new \Hlquery\ValidationException(
-                            "Field '{$key}' contains invalid character: comma (`,`). " .
-                            "Array items cannot contain commas. Use underscores (_) or spaces instead."
-                        );
-                    }
-                }
+
+            if (!is_string($key) || trim($key) === '') {
+                throw new \Hlquery\ValidationException("Document field names must be non-empty strings");
             }
         }
     }

@@ -61,13 +61,15 @@ namespace {
     }
     assertTrue($threw, 'Invalid collection names should raise ValidationException');
 
+    Validator::validateDocumentFields(['title' => 'valid,value']);
+
     $threw = false;
     try {
-        Validator::validateDocumentFields(['title' => 'bad,value']);
+        Validator::validateDocumentFields(['' => 'value']);
     } catch (\Hlquery\ValidationException $e) {
         $threw = true;
     }
-    assertTrue($threw, 'Comma-containing field values should be rejected');
+    assertTrue($threw, 'Empty document field names should be rejected');
 
     fwrite(STDOUT, "PHP offline smoke tests passed.\n");
 }
