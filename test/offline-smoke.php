@@ -10,10 +10,33 @@ namespace {
     require_once __DIR__ . '/../utils/Config.php';
     require_once __DIR__ . '/../utils/Auth.php';
     require_once __DIR__ . '/../utils/Validator.php';
+    require_once __DIR__ . '/../lib/Client.php';
+    require_once __DIR__ . '/../lib/Service.php';
+    require_once __DIR__ . '/../lib/Synonyms.php';
+    require_once __DIR__ . '/../lib/Stopwords.php';
+    require_once __DIR__ . '/../lib/Overrides.php';
+    require_once __DIR__ . '/../lib/Presets.php';
 
     use Hlquery\Utils\Auth;
     use Hlquery\Utils\Config;
     use Hlquery\Utils\Validator;
+
+    class RecordingClient extends \Hlquery\Client {
+        public $last_request = null;
+
+        public function __construct() {}
+
+        public function executeRequest($method, $path, $payload = null, array $query = []) {
+            $this->last_request = [
+                'method' => $method,
+                'path' => $path,
+                'payload' => $payload,
+                'query' => $query,
+            ];
+
+            return $this->last_request;
+        }
+    }
 
     function assertTrue($condition, string $message): void {
         if (!$condition) {
@@ -46,6 +69,11 @@ namespace {
         Auth::getAuthHeader('secret', 'api-key'),
         'API key header should be generated'
     );
+    assertSame(
+        ['header' => 'X-TYPESENSE-API-KEY', 'value' => 'secret'],
+        Auth::getAuthHeader('secret', 'typesense'),
+        'Typesense-compatible API key header should be generated'
+    );
 
     Validator::validateCollectionName('books');
     Validator::validateDocumentId('doc-1');
@@ -70,6 +98,57 @@ namespace {
         $threw = true;
     }
     assertTrue($threw, 'Empty document field names should be rejected');
+
+    $client = new RecordingClient();
+
+    $synonyms = new \Hlquery\Synonyms($client);
+    $synonyms->listSynonymSets(['sort_by' => 'id']);
+    assertSame(
+        ['method' => 'GET', 'path' => '/synonym_sets', 'payload' => null, 'query' => ['sort_by' => 'id']],
+        $client->last_request,
+        'Synonym set listing should use the compatibility route'
+    );
+    $synonyms->updateInGlobalSynonymSet('smart phone', ['synonyms' => ['phone']]);
+    assertSame(
+        ['method' => 'PUT', 'path' => '/synonym_sets/global/items/smart%20phone', 'payload' => ['synonyms' => ['phone']], 'query' => []],
+        $client->last_request,
+        'Global synonym set updates should URL-encode term ids'
+    );
+
+    $stopwords = new \Hlquery\Stopwords($client);
+    $stopwords->listStopwordSets(['sort_by' => 'word']);
+    assertSame(
+        ['method' => 'GET', 'path' => '/stopword_sets', 'payload' => null, 'query' => ['sort_by' => 'word']],
+        $client->last_request,
+        'Stopword set listing should use the compatibility route'
+    );
+    $stopwords->deleteFromGlobalStopwordSet('the word');
+    assertSame(
+        ['method' => 'DELETE', 'path' => '/stopword_sets/global/items/the%20word', 'payload' => null, 'query' => []],
+        $client->last_request,
+        'Stopword set item deletes should URL-encode item ids'
+    );
+
+    $overrides = new \Hlquery\Overrides($client);
+    $overrides->createCuration('books', 'launch promo', ['rule' => ['query' => 'launch']]);
+    assertSame(
+        ['method' => 'POST', 'path' => '/collections/books/curations/launch%20promo', 'payload' => ['rule' => ['query' => 'launch']], 'query' => []],
+        $client->last_request,
+        'Curation helpers should use the curation route alias'
+    );
+
+    $presets = new \Hlquery\Presets($client);
+    $presets->upsert('popular books', ['q' => '*', 'query_by' => 'title']);
+    assertSame(
+        ['method' => 'PUT', 'path' => '/presets/popular%20books', 'payload' => ['q' => '*', 'query_by' => 'title'], 'query' => []],
+        $client->last_request,
+        'Preset helpers should URL-encode preset names'
+    );
+
+    assertTrue(isset($client->synonymSets), 'Client should expose synonymSets as a service alias');
+    assertTrue(isset($client->stopwordSets), 'Client should expose stopwordSets as a service alias');
+    assertTrue(isset($client->curations), 'Client should expose curations as a service alias');
+    assertTrue(isset($client->presets), 'Client should expose presets as a service alias');
 
     fwrite(STDOUT, "PHP offline smoke tests passed.\n");
 }

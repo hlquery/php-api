@@ -38,12 +38,15 @@ class Auth {
      * Get authentication header value
      * 
      * @param string $token
-     * @param string $method 'bearer' or 'api-key'
+     * @param string $method 'bearer', 'api-key', or 'typesense'
      * @return array ['header' => 'Header-Name', 'value' => 'Header-Value']
      */
     public static function getAuthHeader($token, $method = 'bearer') {
         if ($method === 'api-key') {
             return ['header' => 'X-API-Key', 'value' => $token];
+        }
+        if ($method === 'typesense' || $method === 'typesense-api-key') {
+            return ['header' => 'X-TYPESENSE-API-KEY', 'value' => $token];
         }
         return ['header' => 'Authorization', 'value' => 'Bearer ' . $token];
     }

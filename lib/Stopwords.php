@@ -12,9 +12,19 @@ class Stopwords extends Service
           return $this->client->executeRequest('GET', '/stopwords', null, $params);
      }
 
+     public function listStopwordSets(array $params = [])
+     {
+          return $this->client->executeRequest('GET', '/stopword_sets', null, $params);
+     }
+
      public function listGlobal(array $params = [])
      {
           return $this->client->executeRequest('GET', '/stopwords/global', null, $params);
+     }
+
+     public function listGlobalStopwordSet(array $params = [])
+     {
+          return $this->client->executeRequest('GET', '/stopword_sets/global', null, $params);
      }
 
      public function createGlobal(array $payload)
@@ -22,9 +32,19 @@ class Stopwords extends Service
           return $this->client->executeRequest('POST', '/stopwords/global', $payload);
      }
 
+     public function createInGlobalStopwordSet(array $payload)
+     {
+          return $this->client->executeRequest('POST', '/stopword_sets/global', $payload);
+     }
+
      public function deleteGlobal($term)
      {
           return $this->client->executeRequest('DELETE', '/stopwords/global/' . rawurlencode((string) $term));
+     }
+
+     public function deleteFromGlobalStopwordSet($term)
+     {
+          return $this->client->executeRequest('DELETE', '/stopword_sets/global/items/' . rawurlencode((string) $term));
      }
 
      public function list($collection_name, array $params = [])

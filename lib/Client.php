@@ -22,6 +22,7 @@ class Client
      private $users_service;
      private $modules_service;
      private $analytics_service;
+     private $presets_service;
 
      public function __get($name)
      {
@@ -36,10 +37,13 @@ class Client
                case 'sql':
                     return $this->sql();
                case 'synonyms':
+               case 'synonymSets':
                     return $this->synonyms();
                case 'stopwords':
+               case 'stopwordSets':
                     return $this->stopwords();
                case 'overrides':
+               case 'curations':
                     return $this->overrides();
                case 'aliases':
                     return $this->aliases();
@@ -51,6 +55,8 @@ class Client
                     return $this->modules();
                case 'analytics':
                     return $this->analytics();
+               case 'presets':
+                    return $this->presets();
           }
 
           trigger_error('Undefined property: ' . __CLASS__ . '::$' . (string) $name, E_USER_NOTICE);
@@ -59,7 +65,7 @@ class Client
 
      public function __isset($name)
      {
-          return in_array($name, ['collections', 'documents', 'keys', 'sql', 'synonyms', 'stopwords', 'overrides', 'aliases', 'links', 'users', 'modules', 'analytics'], true);
+          return in_array($name, ['collections', 'documents', 'keys', 'sql', 'synonyms', 'synonymSets', 'stopwords', 'stopwordSets', 'overrides', 'curations', 'aliases', 'links', 'users', 'modules', 'analytics', 'presets'], true);
      }
 
      public function __construct($base_url = null, array $options = [])
@@ -362,6 +368,16 @@ class Client
           return $this->analytics_service;
      }
 
+     public function presets()
+     {
+          if ($this->presets_service === null)
+          {
+               $this->presets_service = new Presets($this);
+          }
+
+          return $this->presets_service;
+     }
+
      public function searchApi()
      {
           return $this;
@@ -405,6 +421,31 @@ class Client
      public function multiSearchGet(array $params = [])
      {
           return $this->executeRequest('GET', '/multi_search', null, $params);
+     }
+
+     public function listSynonymSets(array $params = [])
+     {
+          return $this->synonyms()->listSynonymSets($params);
+     }
+
+     public function listGlobalSynonymSet(array $params = [])
+     {
+          return $this->synonyms()->listGlobalSynonymSet($params);
+     }
+
+     public function listCurations($collection_name, array $params = [])
+     {
+          return $this->overrides()->listCurations($collection_name, $params);
+     }
+
+     public function listStopwordSets(array $params = [])
+     {
+          return $this->stopwords()->listStopwordSets($params);
+     }
+
+     public function listGlobalStopwordSet(array $params = [])
+     {
+          return $this->stopwords()->listGlobalStopwordSet($params);
      }
 
      public function globalSearch(array $params, $method = 'GET')
