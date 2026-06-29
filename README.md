@@ -138,3 +138,26 @@ $moduleResponse = $client->executeRequest('GET', '/modules/<name>/<route>', null
 
 print_r($moduleResponse->getBody());
 ```
+
+### Contributing
+
+We welcome contributions from the community! All contributions must be released under the BSD 3-Clause license.
+
+### How to Contribute
+
+- Check existing [PHP API issues](https://github.com/hlquery/php-api/issues) or create new ones
+- Contribute PHP client changes to [hlquery/php-api](https://github.com/hlquery/php-api)
+- Contribute shared server/API changes to [hlquery/hlquery](https://github.com/hlquery/hlquery)
+- Test and report bugs against the PHP client
+- Improve PHP-specific documentation and examples
+
+### Community
+
+- [Documentation](https://docs.hlquery.com)
+- [X (Twitter)](https://x.com/hlquery)
+- [PHP API GitHub](https://github.com/hlquery/php-api)
+- [hlquery GitHub](https://github.com/hlquery/hlquery)
+
+### License
+
+The hlquery PHP API is licensed under the [BSD 3-Clause License](https://opensource.org/licenses/BSD-3-Clause).
