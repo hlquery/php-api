@@ -53,7 +53,23 @@ class Collections extends Service
      {
           \Hlquery\Utils\Validator::validateCollectionName($collection_name);
 
-          return $this->client->executeRequest('GET', '/collections/' . rawurlencode($collection_name) . '/fields');
+          $response = $this->get($collection_name);
+
+          if (!$response instanceof \Hlquery\Response || !$response->isSuccess())
+          {
+               return $response;
+          }
+
+          $body = $response->getBody();
+          $fields = is_array($body) && isset($body['fields']) && is_array($body['fields']) ? $body['fields'] : [];
+
+          return new \Hlquery\Response(
+               $response->getStatusCode(),
+               $response->getHeaders(),
+               $fields,
+               json_encode($fields),
+               $response->getError()
+          );
      }
 
      public function language($collection_name)
@@ -97,14 +113,7 @@ class Collections extends Service
      {
           \Hlquery\Utils\Validator::validateCollectionName($collection_name);
 
-          $response = $this->client->executeRequest('POST', '/collections/' . rawurlencode($collection_name) . '/update', $schema);
-
-          if ($response->getStatusCode() === 404)
-          {
-               return $this->client->executeRequest('PATCH', '/collections/' . rawurlencode($collection_name), $schema);
-          }
-
-          return $response;
+          return $this->client->executeRequest('POST', '/collections/' . rawurlencode($collection_name) . '/update', $schema);
      }
 
      public function delete($collection_name)

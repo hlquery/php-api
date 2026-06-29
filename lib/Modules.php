@@ -49,7 +49,8 @@ class Modules extends Service
 
      public function request($method, $path, $payload = null, array $query = [])
      {
-          $normalized = trim((string) $path, '/');
+          $parts = array_values(array_filter(explode('/', trim((string) $path, '/')), 'strlen'));
+          $normalized = implode('/', array_map('rawurlencode', $parts));
 
           return $this->client->executeRequest(
                strtoupper((string) $method),

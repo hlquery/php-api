@@ -10,8 +10,11 @@ namespace {
     require_once __DIR__ . '/../utils/Config.php';
     require_once __DIR__ . '/../utils/Auth.php';
     require_once __DIR__ . '/../utils/Validator.php';
+    require_once __DIR__ . '/../lib/Response.php';
     require_once __DIR__ . '/../lib/Client.php';
     require_once __DIR__ . '/../lib/Service.php';
+    require_once __DIR__ . '/../lib/Collections.php';
+    require_once __DIR__ . '/../lib/Modules.php';
     require_once __DIR__ . '/../lib/Synonyms.php';
     require_once __DIR__ . '/../lib/Stopwords.php';
     require_once __DIR__ . '/../lib/Overrides.php';
@@ -100,6 +103,35 @@ namespace {
     assertTrue($threw, 'Empty document field names should be rejected');
 
     $client = new RecordingClient();
+
+    $client->cache();
+    assertSame(
+        ['method' => 'GET', 'path' => '/cache', 'payload' => null, 'query' => []],
+        $client->last_request,
+        'Client should expose the cache route'
+    );
+
+    $collections = new \Hlquery\Collections($client);
+    $collections->getFields('books');
+    assertSame(
+        ['method' => 'GET', 'path' => '/collections/books', 'payload' => null, 'query' => []],
+        $client->last_request,
+        'Collection fields helper should use the collection metadata route'
+    );
+    $collections->update('books', ['fields' => [['name' => 'title', 'type' => 'string']]]);
+    assertSame(
+        ['method' => 'POST', 'path' => '/collections/books/update', 'payload' => ['fields' => [['name' => 'title', 'type' => 'string']]], 'query' => []],
+        $client->last_request,
+        'Collection updates should use the supported update route'
+    );
+
+    $modules = new \Hlquery\Modules($client);
+    $modules->request('GET', 'demo module/search route', null, ['q' => 'phone']);
+    assertSame(
+        ['method' => 'GET', 'path' => '/modules/demo%20module/search%20route', 'payload' => null, 'query' => ['q' => 'phone']],
+        $client->last_request,
+        'Module request paths should URL-encode each path segment'
+    );
 
     $synonyms = new \Hlquery\Synonyms($client);
     $synonyms->listSynonymSets(['sort_by' => 'id']);

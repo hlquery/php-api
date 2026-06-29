@@ -203,6 +203,11 @@ class Client
           return $this->executeRequest('GET', '/boot-status');
      }
 
+     public function cache()
+     {
+          return $this->executeRequest('GET', '/cache');
+     }
+
      public function integrity()
      {
           return $this->executeRequest('GET', '/integrity');
