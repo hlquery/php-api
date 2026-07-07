@@ -11,6 +11,7 @@ namespace {
     require_once __DIR__ . '/../utils/Auth.php';
     require_once __DIR__ . '/../utils/Validator.php';
     require_once __DIR__ . '/../lib/Response.php';
+    require_once __DIR__ . '/../lib/HttpClient.php';
     require_once __DIR__ . '/../lib/Client.php';
     require_once __DIR__ . '/../lib/Service.php';
     require_once __DIR__ . '/../lib/Collections.php';
@@ -181,6 +182,11 @@ namespace {
     assertTrue(isset($client->stopwordSets), 'Client should expose stopwordSets as a service alias');
     assertTrue(isset($client->curations), 'Client should expose curations as a service alias');
     assertTrue(isset($client->presets), 'Client should expose presets as a service alias');
+
+    $httpClient = new \Hlquery\HttpClient('http://localhost:9200');
+    $badPayloadResponse = $httpClient->request('POST', '/documents', ['score' => INF]);
+    assertSame(0, $badPayloadResponse->getStatusCode(), 'JSON payload encoding failures should not attempt a request');
+    assertTrue(strpos($badPayloadResponse->getError(), 'Unable to encode request payload as JSON') === 0, 'JSON encoding errors should be reported');
 
     fwrite(STDOUT, "PHP offline smoke tests passed.\n");
 }

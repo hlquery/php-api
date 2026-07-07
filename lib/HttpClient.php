@@ -28,6 +28,11 @@ class HttpClient
 
      public function request($method, $path, $payload = null, array $query = [], array $extra_headers = [])
      {
+          if (!function_exists('curl_init'))
+          {
+               return new Response(0, [], null, '', 'The PHP cURL extension is required by the hlquery HTTP client.');
+          }
+
           $url = $this->buildUrl($path, $query);
           $headers = [
                'Accept: application/json',
@@ -45,6 +50,11 @@ class HttpClient
           {
                $headers[] = 'Content-Type: application/json';
                $body = json_encode($payload);
+
+               if ($body === false)
+               {
+                    return new Response(0, [], null, '', 'Unable to encode request payload as JSON: ' . json_last_error_msg());
+               }
           }
 
           foreach ($extra_headers as $name => $value)
