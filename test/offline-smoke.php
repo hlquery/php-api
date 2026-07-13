@@ -112,6 +112,20 @@ namespace {
         'Client should expose the cache route'
     );
 
+    $client->configFiles();
+    assertSame(
+        ['method' => 'GET', 'path' => '/config-files', 'payload' => null, 'query' => []],
+        $client->last_request,
+        'Client should expose the config files route'
+    );
+
+    $client->multiSearchGet(['searches' => [['collection' => 'books', 'q' => 'phone']]]);
+    assertSame(
+        ['method' => 'GET', 'path' => '/multi_search', 'payload' => ['searches' => [['collection' => 'books', 'q' => 'phone']]], 'query' => []],
+        $client->last_request,
+        'GET multi-search should send the searches payload in the request body'
+    );
+
     $collections = new \Hlquery\Collections($client);
     $collections->getFields('books');
     assertSame(

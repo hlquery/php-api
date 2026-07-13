@@ -4,7 +4,7 @@
 
 <div align="center">
 
-**A modular PHP client library for hlquery, designed with a familiar and intuitive API structure.**
+**A modular PHP client library for hlquery with a familiar service-based API.**
 
 [![Follow hlquery](https://img.shields.io/badge/Follow-%40hlquery-blue?logo=x&logoColor=white&labelColor=000000)](https://x.com/hlquery)
 [![PHP build](https://img.shields.io/badge/PHP%20build-passing-brightgreen?logo=php&logoColor=white&labelColor=000000)](https://github.com/hlquery/php-api/actions/workflows/ci.yml)
@@ -22,9 +22,9 @@ The library wraps hlquery's HTTP endpoints in a service-based API so you can cre
 
 ### Why use it?
 
-Use the PHP API when you want hlquery integration to feel like part of your application instead of a pile of hand-written REST calls. It reduces boilerplate, keeps authentication and request formatting consistent, and makes common operations easier to read and maintain.
+Use the PHP API when you want hlquery integration to feel like part of your application instead of a pile of handwritten REST calls. It reduces boilerplate, keeps authentication and request formatting consistent, and makes common operations easier to read and maintain.
 
-### Install
+### Installation
 
 Requirements:
 
@@ -38,7 +38,7 @@ Composer:
 $ composer require hlquery/php-client
 ```
 
-Local usage:
+Local checkout:
 
 ```php
 require_once __DIR__ . '/lib/autoload.php';
@@ -47,7 +47,7 @@ use Hlquery\Client;
 $client = new Client(getenv('HLQ_BASE_URL') ?: (getenv('HLQUERY_BASE_URL') ?: 'http://localhost:9200'));
 ```
 
-Composer usage:
+Composer autoload:
 
 ```php
 require_once __DIR__ . '/vendor/autoload.php';
@@ -57,7 +57,7 @@ use Hlquery\Client;
 $client = new Client('http://localhost:9200');
 ```
 
-### Auth
+### Authentication
 
 ```php
 $client = new Client('http://localhost:9200', [
@@ -69,7 +69,7 @@ $client->setAuthToken('your_token_here', 'bearer');
 $client->setAuthToken('your_api_key_here', 'api-key');
 ```
 
-### Quick Start
+### Quick start
 
 ```php
 require_once __DIR__ . '/vendor/autoload.php';
@@ -89,7 +89,7 @@ print_r($collections->getBody());
 
 ### Collections
 
-List collections with pagination and iterate over the result:
+List collections with pagination and iterate over the results:
 
 ```php
 $response = $client->listCollections(0, 100);
@@ -127,7 +127,7 @@ print_r($rows->getBody());
 print_r($books->getBody());
 ```
 
-### Reduce Text Example
+### Custom Module Routes
 
 Use `executeRequest()` to call custom module routes directly:
 
@@ -145,7 +145,7 @@ We welcome contributions from the community! All contributions must be released 
 
 ### How to Contribute
 
-- Check existing [PHP API issues](https://github.com/hlquery/php-api/issues) or create new ones
+- Check existing [PHP API issues](https://github.com/hlquery/php-api/issues) or open a new one
 - Contribute PHP client changes to [hlquery/php-api](https://github.com/hlquery/php-api)
 - Contribute shared server/API changes to [hlquery/hlquery](https://github.com/hlquery/hlquery)
 - Test and report bugs against the PHP client

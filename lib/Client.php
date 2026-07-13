@@ -193,6 +193,11 @@ class Client
           return $this->executeRequest('GET', '/search-config');
      }
 
+     public function configFiles()
+     {
+          return $this->executeRequest('GET', '/config-files');
+     }
+
      public function startup()
      {
           return $this->executeRequest('GET', '/startup');
@@ -423,9 +428,9 @@ class Client
           return $this->executeRequest('POST', '/multi_search', $payload);
      }
 
-     public function multiSearchGet(array $params = [])
+     public function multiSearchGet(array $payload = [])
      {
-          return $this->executeRequest('GET', '/multi_search', null, $params);
+          return $this->executeRequest('GET', '/multi_search', $payload);
      }
 
      public function listSynonymSets(array $params = [])
