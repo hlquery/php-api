@@ -470,6 +470,11 @@ class Client
           return $this->executeRequest('GET', '/search', null, $params);
      }
 
+     public function searchAll(array $params = [], $method = 'GET')
+     {
+          return $this->globalSearch($params, $method);
+     }
+
      public function vectorSearch($collection_name, array $params)
      {
           return $this->collections()->vectorSearch($collection_name, $params);

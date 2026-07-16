@@ -151,6 +151,15 @@ We welcome contributions from the community! All contributions must be released 
 - Test and report bugs against the PHP client
 - Improve PHP-specific documentation and examples
 
+### Search all collections
+
+```php
+$result = $client->searchAll(['q' => 'research', 'limit' => 20]);
+$selected = $client->searchAll(['q' => 'research', 'collections' => ['universities', 'science']], 'POST');
+```
+
+`globalSearch` remains available as an equivalent name. Results are globally merged and each hit includes `document._collection`.
+
 ### Community
 
 - 📖 [Documentation](https://docs.hlquery.com)
