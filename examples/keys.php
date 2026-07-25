@@ -15,7 +15,7 @@ $baseUrl = 'http://localhost:9200';
 
 try {
     $client = new Client($baseUrl);
-    $client->setAuthToken($adminToken);
+//    $client->setAuthToken($adminToken);
 
     echo "1. Creating a scoped search key for 'products' collection...\n";
     $createResp = $client->keys()->create([
