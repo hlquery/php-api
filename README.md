@@ -80,28 +80,34 @@ $client = new Client('http://localhost:9200');
 
 $health = $client->health();
 if ($health->isSuccess()) {
-    echo "status: " . (($health->getBody()['status'] ?? 'ok')) . PHP_EOL;
+    echo "status: " . ($health['status'] ?? 'ok') . PHP_EOL;
 }
 
 $collections = $client->listCollections(0, 10);
-print_r($collections->getBody());
+print_r($collections->toArray());
 ```
 
 ### Collections
 
-List collections with pagination and iterate over the results:
+For the common case, get collection names as a native PHP array:
 
 ```php
-$response = $client->listCollections(0, 100);
+foreach ($client->collections()->names(0, 100) as $name) {
+    echo $name . PHP_EOL;
+}
+```
+
+Responses also support read-only array access, iteration, `count()`, and
+`json_encode()` directly. Keep the response object when you need HTTP metadata:
+
+```php
+$response = $client->collections()->list(0, 100);
 
 if (!$response->isSuccess()) {
     throw new RuntimeException('Failed to list collections: ' . $response->getStatusCode());
 }
 
-$body = $response->getBody();
-$collections = $body['collections'] ?? [];
-
-foreach ($collections as $collection) {
+foreach ($response['collections'] ?? [] as $collection) {
     $name = is_array($collection) ? ($collection['name'] ?? '') : $collection;
 
     if ($name === '') {
@@ -123,8 +129,8 @@ $books = $sql->query(
     'SELECT id, title FROM books ORDER BY title ASC LIMIT 3;'
 );
 
-print_r($rows->getBody());
-print_r($books->getBody());
+print_r($rows->toArray());
+print_r($books->toArray());
 ```
 
 ### Custom Module Routes
@@ -136,7 +142,7 @@ $moduleResponse = $client->executeRequest('GET', '/modules/<name>/<route>', null
     'q' => 'example query',
 ]);
 
-print_r($moduleResponse->getBody());
+print_r($moduleResponse->toArray());
 ```
 
 ### Contributing

@@ -22,6 +22,63 @@ class Collections extends Service
           );
      }
 
+     /**
+      * Return collection records as a plain PHP array.
+      *
+      * Use list() when HTTP status or response headers are needed.
+      */
+     public function items($offset = 0, $limit = 100)
+     {
+          $response = $this->list($offset, $limit);
+          $this->assertSuccessfulListResponse($response);
+
+          $collections = $response['collections'] ?? [];
+          return is_array($collections) ? $collections : [];
+     }
+
+     /**
+      * Return only collection names as a plain PHP array.
+      */
+     public function names($offset = 0, $limit = 100)
+     {
+          $names = [];
+
+          foreach ($this->items($offset, $limit) as $collection)
+          {
+               $name = is_array($collection) ? ($collection['name'] ?? '') : $collection;
+
+               if (is_string($name) && $name !== '')
+               {
+                    $names[] = $name;
+               }
+          }
+
+          return $names;
+     }
+
+     private function assertSuccessfulListResponse($response)
+     {
+          if (!$response instanceof \Hlquery\Response)
+          {
+               throw new \RuntimeException('Failed to list collections: invalid response.');
+          }
+
+          if ($response->isSuccess())
+          {
+               return;
+          }
+
+          $message = $response->getMessage();
+          if ($message === '')
+          {
+               $message = $response->getStatusCode() > 0
+                    ? 'HTTP ' . $response->getStatusCode()
+                    : 'request failed';
+          }
+
+          throw new \RuntimeException('Failed to list collections: ' . $message);
+     }
+
      public function distributed(array $params = [])
      {
           return $this->client->executeRequest('GET', '/collections/distributed', null, $params);

@@ -42,6 +42,15 @@ namespace {
         }
     }
 
+    class ResponseClient extends RecordingClient {
+        public $response;
+
+        public function executeRequest($method, $path, $payload = null, array $query = []) {
+            parent::executeRequest($method, $path, $payload, $query);
+            return $this->response;
+        }
+    }
+
     function assertTrue($condition, string $message): void {
         if (!$condition) {
             throw new \RuntimeException($message);
@@ -92,6 +101,58 @@ namespace {
         $threw = true;
     }
     assertTrue($threw, 'Invalid collection names should raise ValidationException');
+
+    $nativeResponse = new \Hlquery\Response(200, ['Content-Type' => 'application/json'], [
+        'collections' => [
+            ['name' => 'books'],
+            'articles',
+        ],
+        'total' => 2,
+    ]);
+    assertSame(2, $nativeResponse['total'], 'Responses should support array access');
+    assertSame(2, count($nativeResponse), 'Response count should match top-level body entries');
+    assertSame(
+        ['collections', 'total'],
+        array_keys(iterator_to_array($nativeResponse)),
+        'Responses should be directly iterable'
+    );
+    assertSame(
+        '{"collections":[{"name":"books"},"articles"],"total":2}',
+        json_encode($nativeResponse),
+        'Responses should JSON-encode as their body'
+    );
+    assertSame($nativeResponse->getBody(), $nativeResponse->toArray(), 'toArray should expose array bodies');
+
+    $writeThrew = false;
+    try {
+        $nativeResponse['total'] = 3;
+    } catch (\BadMethodCallException $e) {
+        $writeThrew = true;
+    }
+    assertTrue($writeThrew, 'Response array access should remain read-only');
+
+    $responseClient = new ResponseClient();
+    $responseClient->response = $nativeResponse;
+    $nativeCollections = new \Hlquery\Collections($responseClient);
+    assertSame(
+        [['name' => 'books'], 'articles'],
+        $nativeCollections->items(0, 100),
+        'Collection items should return the native collection list'
+    );
+    assertSame(
+        ['books', 'articles'],
+        $nativeCollections->names(0, 100),
+        'Collection names should normalize object and string entries'
+    );
+
+    $responseClient->response = new \Hlquery\Response(503, [], ['message' => 'temporarily unavailable']);
+    $listThrew = false;
+    try {
+        $nativeCollections->names();
+    } catch (\RuntimeException $e) {
+        $listThrew = strpos($e->getMessage(), 'temporarily unavailable') !== false;
+    }
+    assertTrue($listThrew, 'Native collection helpers should throw useful API errors');
 
     Validator::validateDocumentFields(['title' => 'valid,value']);
 

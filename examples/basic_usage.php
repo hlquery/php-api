@@ -22,14 +22,10 @@ if ($token) {
 // Health check
 $health = $client->health();
 echo "Health Status: " . $health->getStatusCode() . "\n";
-echo "Health Body: " . json_encode($health->getBody(), JSON_PRETTY_PRINT) . "\n";
+echo "Health Body: " . json_encode($health, JSON_PRETTY_PRINT) . "\n";
 
 // List collections
-$collections = $client->listCollections(0, 10);
-if ($collections->isSuccess()) {
-    $body = $collections->getBody();
-    $count = isset($body['collections']) ? count($body['collections']) : 0;
-    echo "Found $count collections\n";
-}
+$collectionNames = $client->collections()->names(0, 10);
+echo "Found " . count($collectionNames) . " collections\n";
 
 echo "Base URL: {$baseUrl}\n";

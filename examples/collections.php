@@ -21,22 +21,21 @@ $exampleCollection = 'php_collections_example_' . getmypid();
 
 // List collections
 $collections = $client->collections()->list(0, 10);
-echo "Collections: " . json_encode($collections->getBody(), JSON_PRETTY_PRINT) . "\n";
+echo "Collections: " . json_encode($collections, JSON_PRETTY_PRINT) . "\n";
 
 // Get collection details
 if ($collections->isSuccess()) {
-    $body = $collections->getBody();
-    if (isset($body['collections']) && !empty($body['collections'])) {
-        $first_collection = $body['collections'][0];
+    if (!empty($collections['collections'])) {
+        $first_collection = $collections['collections'][0];
         $collection_name = is_array($first_collection) ? ($first_collection['name'] ?? $first_collection) : $first_collection;
         
         // Get collection
         $collection = $client->collections()->get($collection_name);
-        echo "Collection details: " . json_encode($collection->getBody(), JSON_PRETTY_PRINT) . "\n";
+        echo "Collection details: " . json_encode($collection, JSON_PRETTY_PRINT) . "\n";
         
         // Get formatted fields
         $fields = $client->collections()->getFields($collection_name);
-        echo "Collection fields: " . json_encode($fields->getBody(), JSON_PRETTY_PRINT) . "\n";
+        echo "Collection fields: " . json_encode($fields, JSON_PRETTY_PRINT) . "\n";
     }
 }
 
@@ -49,8 +48,8 @@ $schema = [
     ]
 ];
 $createResult = $client->collections()->create($exampleCollection, $schema);
-echo "Create result: " . json_encode($createResult->getBody(), JSON_PRETTY_PRINT) . "\n";
+echo "Create result: " . json_encode($createResult, JSON_PRETTY_PRINT) . "\n";
 
 // Delete collection
 $deleteResult = $client->collections()->delete($exampleCollection);
-echo "Delete result: " . json_encode($deleteResult->getBody(), JSON_PRETTY_PRINT) . "\n";
+echo "Delete result: " . json_encode($deleteResult, JSON_PRETTY_PRINT) . "\n";
